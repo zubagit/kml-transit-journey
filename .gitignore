@@ -1,0 +1,19 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+# Keep personal transit datasets out of public source by default.
+*.kml
+*.kmz
+!examples/*.kml

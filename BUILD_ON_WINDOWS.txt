@@ -1,0 +1,28 @@
+KML TRANSIT JOURNEY — CREATE A WINDOWS INSTALLER
+
+The actual app is already included as index.html. You do not need to write code.
+
+1. Install Node.js LTS (https://nodejs.org/en/download) on Windows.
+2. Extract this ZIP to a folder (e.g. Desktop\KML Transit Journey).
+3. Open that extracted folder in Windows File Explorer.
+4. Click the address bar, type cmd, and press Enter.
+5. In the command window, enter:
+      npm ci
+   Wait until dependencies finish installing.
+6. Run source checks and functional tests:
+      npm run check
+      npm test
+   Open the desktop app with:
+      npm start
+7. To create a shareable Windows setup installer, run:
+      npm run dist
+8. Check the packaged app with:
+      npm run test:packaged
+   Open the dist folder. It will contain the generated .exe installer.
+
+IMPORTANT NOTES
+- Internet is needed for background map tiles, address search, and walking routes.
+- Electron and packaging tools are downloaded during npm install.
+- Windows may show an unknown-publisher warning for an unsigned installer.
+- Don't distribute a public installer until you've tested external search services and their usage policies.
+- Importing a different KML file inside the app works as in the HTML version.

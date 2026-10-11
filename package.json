@@ -1,0 +1,65 @@
+{
+  "name": "kml-transit-journey",
+  "version": "1.0.0",
+  "description": "KML Transit Journey - fictional transit network trip planner",
+  "main": "main.cjs",
+  "author": "KML Transit Journey",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "check": "node scripts/check.cjs",
+    "test": "node tests/electron-smoke.cjs",
+    "test:packaged": "node tests/electron-smoke.cjs --packaged",
+    "predist": "npm run check",
+    "dist": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "playwright": "1.64.0"
+  },
+  "dependencies": {
+    "leaflet": "1.9.4"
+  },
+  "build": {
+    "appId": "app.kmltransitjourney.desktop",
+    "productName": "KML Transit Journey",
+    "files": [
+      "index.html",
+      "main.cjs",
+      "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "node_modules/leaflet/dist/**/*"
+    ],
+    "asar": true,
+    "artifactName": "KML-Transit-Journey-${version}-Windows-${arch}-Setup.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": false
+    }
+  }
+}

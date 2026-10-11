@@ -1,0 +1,655 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://server.arcgisonline.com https://a.tile.openstreetmap.fr; connect-src https://photon.komoot.io https://valhalla1.openstreetmap.de; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KML Transit Journey — Transit Route Planner</title><link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css"/><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,sans-serif;background:#f1f5f8;color:#19333c}.top{background:#123c48;color:white;padding:18px 24px;display:flex;align-items:center;gap:15px}.logo{border:2px solid #fff;border-radius:8px;padding:9px;font-weight:900;letter-spacing:2px}.top small{display:block;color:#bfd4d8}.stripes{height:6px;display:flex}.stripes span{flex:1}main{max-width:1250px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:355px 1fr;gap:18px}.panel,.mapbox{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 14px #163e4812}.panel h2{margin:0 0 14px;font-size:21px}label{display:block;font-size:12px;font-weight:700;color:#566b74;margin:13px 0 6px}select,button{width:100%;border:1px solid #cdd8de;border-radius:9px;background:#fff;padding:12px;font-size:14px;color:#19333c}button{margin-top:15px;border:0;background:#124c61;color:white;font-weight:800;cursor:pointer}button:hover{background:#206e88}.note{font-size:12px;color:#637983;line-height:1.5}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0}.metric{background:#edf3f6;padding:12px;border-radius:10px}.metric strong{font-size:21px;display:block}.metric small{color:#697980}.step{padding:13px 0;border-top:1px solid #e5edf0;display:flex;gap:10px}.dot{width:12px;height:12px;border-radius:50%;margin-top:4px;flex-shrink:0}.step small{display:block;color:#68808a;margin-top:4px}.mapbox{padding:10px;min-height:650px;display:flex;flex-direction:column}.map-toolbar{padding:3px 10px 8px;display:flex;align-items:center;gap:8px}.map-toolbar label{margin:0;white-space:nowrap}.map-toolbar select{width:auto;padding:6px;font-size:12px}.maphead{padding:10px;font-weight:700;display:flex;justify-content:space-between}.maphead small{font-weight:400;color:#72818a}#map{width:100%;height:660px;background:#dce8e9;border-radius:9px;z-index:0;overflow:hidden}.leaflet-container{font-family:inherit}.leaflet-tooltip{font-weight:650}.leaflet-control-attribution{font-size:10px!important}.l{fill:none;stroke-linecap:round;stroke-linejoin:round}.station{fill:#fff;stroke:#213c45;stroke-width:1;cursor:pointer}.station:hover{r:5}.selected{stroke:#10191c;stroke-width:2.5}.footer{font-size:12px;color:#5d7079;margin:10px}.empty{padding:28px 8px;color:#71828a;font-size:14px}@media(max-width:800px){main{grid-template-columns:1fr}.mapbox{min-height:440px}#map{height:430px}}
+/* Self-contained Leaflet layout essentials so file:// pages render tiles and tracks in correct positions */
+.leaflet-container{overflow:hidden;position:relative;outline:0;background:#dce8e9;-webkit-tap-highlight-color:transparent}
+.leaflet-container .leaflet-pane,.leaflet-container .leaflet-map-pane,.leaflet-container .leaflet-tile-pane,.leaflet-container .leaflet-overlay-pane,.leaflet-container .leaflet-shadow-pane,.leaflet-container .leaflet-marker-pane,.leaflet-container .leaflet-tooltip-pane,.leaflet-container .leaflet-popup-pane,.leaflet-container .leaflet-control-container,.leaflet-container .leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-container .leaflet-map-pane{z-index:400}
+.leaflet-container .leaflet-tile-pane{z-index:200}
+.leaflet-container .leaflet-overlay-pane{z-index:400}
+.leaflet-container .leaflet-shadow-pane{z-index:500}
+.leaflet-container .leaflet-marker-pane{z-index:600}
+.leaflet-container .leaflet-tooltip-pane{z-index:650}
+.leaflet-container .leaflet-popup-pane{z-index:700}
+.leaflet-container .leaflet-tile,.leaflet-container .leaflet-marker-icon,.leaflet-container .leaflet-marker-shadow,.leaflet-container .leaflet-pane>svg,.leaflet-container .leaflet-pane>canvas,.leaflet-container .leaflet-zoom-animated{position:absolute;left:0;top:0}
+.leaflet-container .leaflet-tile{visibility:hidden;border:0;max-width:none!important;max-height:none!important;user-select:none;-webkit-user-drag:none}
+.leaflet-container .leaflet-tile-loaded{visibility:inherit}
+.leaflet-container .leaflet-image-layer,.leaflet-container .leaflet-tile{image-rendering:auto}
+.leaflet-container .leaflet-pane>svg,.leaflet-container .leaflet-pane>canvas{overflow:hidden}
+.leaflet-container .leaflet-tile-container{pointer-events:none;position:absolute;left:0;top:0}
+.leaflet-container .leaflet-interactive{cursor:pointer;pointer-events:auto}
+.leaflet-container .leaflet-zoom-animated{transform-origin:0 0}
+.leaflet-container .leaflet-control{position:relative;z-index:800;pointer-events:auto;clear:both}
+.leaflet-container .leaflet-top,.leaflet-container .leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+.leaflet-container .leaflet-top{top:0}.leaflet-container .leaflet-bottom{bottom:0}.leaflet-container .leaflet-left{left:0}.leaflet-container .leaflet-right{right:0}
+.leaflet-container .leaflet-top .leaflet-control{margin-top:10px}.leaflet-container .leaflet-bottom .leaflet-control{margin-bottom:10px}.leaflet-container .leaflet-left .leaflet-control{margin-left:10px;float:left}.leaflet-container .leaflet-right .leaflet-control{margin-right:10px;float:right}
+.leaflet-container .leaflet-bar{box-shadow:0 1px 5px #0006;border-radius:4px;overflow:hidden}
+.leaflet-container .leaflet-bar a{background:#fff;border-bottom:1px solid #ccc;width:30px;height:30px;line-height:30px;text-align:center;display:block;text-decoration:none;color:#222;font-size:21px;font-weight:700}
+.leaflet-container .leaflet-bar a:hover{background:#f4f4f4}.leaflet-container .leaflet-bar a:last-child{border-bottom:none}
+.leaflet-container .leaflet-control-attribution{background:#ffffffc9;padding:1px 5px;font:10px Arial,sans-serif}
+.leaflet-container .leaflet-control-attribution a{color:#1264a3;text-decoration:none}
+.leaflet-container .leaflet-tooltip{position:absolute;background:white;border:1px solid #d2dbe0;border-radius:4px;padding:5px 8px;white-space:nowrap;box-shadow:0 2px 6px #0002;pointer-events:none;font:12px Arial,sans-serif}
+.leaflet-container .leaflet-zoom-hide{visibility:hidden}
+.leaflet-container.leaflet-touch-drag{touch-action:none}.leaflet-container.leaflet-grab{cursor:grab}.leaflet-container.leaflet-dragging{cursor:grabbing}
+
+/* Full-window Google Maps-style layout (v5) */
+html,body{width:100%;height:100%;overflow:hidden}
+body{position:relative;background:#dce8e9}
+.top{position:absolute;z-index:1300;left:15px;top:14px;border-radius:12px;padding:8px 13px;box-shadow:0 4px 25px #1a374155;pointer-events:auto}
+.top .logo{padding:6px;letter-spacing:1px}
+.top small{font-size:10px}
+.stripes{position:absolute;z-index:1250;top:0;left:0;right:0;height:5px}
+main{display:block;position:fixed;inset:0;max-width:none;margin:0;padding:0;overflow:hidden}
+.mapbox{position:absolute;inset:0;min-height:0;display:block;padding:0;border-radius:0;box-shadow:none;background:#dce8e9}
+#map{position:absolute;inset:0;width:100%;height:100%;border-radius:0;z-index:0}
+.maphead{display:none}
+.map-toolbar{position:absolute;z-index:1100;top:17px;right:16px;padding:9px 11px;background:#ffffffef;border-radius:12px;box-shadow:0 2px 14px #102e3933;backdrop-filter:blur(6px)}
+.map-toolbar select{max-width:145px}
+.mapbox>.footer{position:absolute;bottom:16px;left:14px;z-index:1050;background:#fffffff2;border-radius:7px;padding:5px 7px;margin:0;max-width:430px}
+#map-alert{position:absolute;bottom:44px;right:10px;z-index:1100;width:300px}
+.panel{position:absolute;z-index:1150;top:87px;left:16px;bottom:17px;width:355px;max-width:calc(100vw - 32px);overflow-y:auto;overflow-x:hidden;border-radius:15px;box-shadow:0 4px 30px #102e3955;padding:19px;transition:transform .2s ease, opacity .2s ease}
+.panel.is-closed{transform:translateX(calc(-100% - 28px));opacity:0;pointer-events:none}
+.panel h2{padding-right:15px}
+#toggle-panel{position:fixed;z-index:1400;left:16px;top:89px;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;width:auto;min-width:120px;margin:0;background:#123c48;color:#fff;border:0;border-radius:10px;box-shadow:0 4px 16px #123c4855;font-weight:750;font-size:13px}
+#toggle-panel.is-open{left:calc(16px + min(355px, 100vw - 32px) - 44px);top:96px;min-width:0;width:32px;height:32px;padding:0;background:#e9f0f2;color:#123c48;box-shadow:none}
+.leaflet-top.leaflet-left{top:65px}
+.leaflet-bottom.leaflet-right{bottom:22px;right:14px}
+.leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0!important;box-shadow:0 3px 16px #102e3940}
+@media(max-width:690px){.top{top:9px;left:9px;padding:6px 9px;max-width:calc(100vw - 180px)}.top b{font-size:12px}.top small{display:none}.map-toolbar{top:10px;right:9px;padding:5px 8px}.map-toolbar label{display:none}.panel{left:8px;right:8px;top:65px;bottom:8px;width:auto;max-width:none}.panel.is-closed{transform:translateX(calc(-100% - 12px))}#toggle-panel{left:9px;top:67px}#toggle-panel.is-open{left:auto;right:18px;top:75px}.mapbox>.footer{display:none}.leaflet-top.leaflet-left{top:95px}}
+
+/* Neutral dark theme: filter only the background raster tiles, not rail overlays */
+body.dark{background:#101820;color:#e9f3f6}
+body.dark .panel,body.dark .map-toolbar{background:#232629f5;color:#e9f3f6;box-shadow:0 5px 28px #0008}
+body.dark .panel h2,body.dark .maphead{color:#f2f7f9}
+body.dark .note,body.dark label,body.dark .step small,body.dark .metric small,body.dark .maphead small{color:#a9c0ca}
+body.dark select{background:#34393d;border-color:#565f63;color:#f1f8fb}
+body.dark select option{background:#34393d;color:#fff}
+body.dark .metric{background:#35393d;color:#f3fbff}
+body.dark .step{border-top-color:#3a505a}
+body.dark .empty{color:#b4c8d0}
+body.dark #toggle-panel.is-open{background:#34393d;color:#eef8fc}
+body.dark .mapbox{background:#242424}
+body.dark #map{background:#292929}
+body.dark .leaflet-tile-pane{filter:grayscale(1) invert(1) brightness(.62) contrast(.82)}
+body.dark .leaflet-control-zoom a{background:#203541!important;color:#f2f8fb!important;border-bottom-color:#47616e!important}
+body.dark .leaflet-control-attribution{background:#172630dd!important;color:#c4d6df!important}
+body.dark .leaflet-control-attribution a{color:#90d6ee!important}
+body.dark .mapbox>.footer{background:#172630ee;color:#afc3cb}
+body.dark #map-alert{background:#3c282d!important;color:#ffd7d7;border-color:#b66d77!important}
+#theme-toggle{position:absolute;z-index:1100;right:16px;top:77px;width:auto;margin:0;padding:9px 13px;background:#fff;color:#173b48;border:1px solid #c6d6de;border-radius:11px;box-shadow:0 2px 14px #102e3930;font-weight:700;font-size:13px}
+body.dark #theme-toggle{background:#303538;color:#e8f6fa;border-color:#60686b}
+@media(max-width:690px){#theme-toggle{right:9px;top:60px;padding:7px 9px;font-size:12px}}
+
+/* High-contrast station labels, legible in both visual modes */
+.leaflet-container .leaflet-tooltip{background:#ffffff!important;color:#152a33!important;border:1px solid #b8cad2!important;font:700 13px/1.35 Inter,system-ui,Segoe UI,sans-serif!important;padding:7px 11px!important;border-radius:7px!important;box-shadow:0 3px 13px #0005!important;text-shadow:none!important;opacity:1!important}
+.leaflet-tooltip-top:before{border-top-color:#ffffff!important}
+.leaflet-tooltip-bottom:before{border-bottom-color:#ffffff!important}
+.leaflet-tooltip-left:before{border-left-color:#ffffff!important}
+.leaflet-tooltip-right:before{border-right-color:#ffffff!important}
+body.dark .leaflet-container .leaflet-tooltip{background:#162b36!important;color:#ffffff!important;border:1px solid #89a9b9!important;box-shadow:0 4px 16px #000a!important}
+body.dark .leaflet-tooltip-top:before{border-top-color:#162b36!important}
+body.dark .leaflet-tooltip-bottom:before{border-bottom-color:#162b36!important}
+body.dark .leaflet-tooltip-left:before{border-left-color:#162b36!important}
+body.dark .leaflet-tooltip-right:before{border-right-color:#162b36!important}
+
+.mode-tabs{display:flex;gap:5px;margin:8px 0 14px;background:#cad5da55;border-radius:9px;padding:4px}.mode-tabs button{flex:1;margin:0;padding:9px 4px;background:transparent;color:inherit;border:0;border-radius:7px;font-weight:700;cursor:pointer}.mode-tabs button.active{background:#11506a;color:#fff}#address-ui input{display:block;width:100%;border-radius:8px;border:1px solid #c3d5dd;background:white;color:#19333c;padding:12px;margin:4px 0 12px;font:inherit}#address-ui>button{width:100%;cursor:pointer}.walk-status{margin:10px 0;color:#647e88;font-size:12px;line-height:1.5}body.dark #address-ui input{background:#34393d;border-color:#566168;color:white}body.dark .walk-status{color:#b7cbd2}[hidden]{display:none!important}.walk-summary{border-top:1px solid #8ca0a044;padding:13px 0;font-size:13px;line-height:1.6}.walk-summary strong{font-size:15px}.walk-summary .leg{margin:6px 0}.walk-summary small{display:block;color:#71909c}body.dark .walk-summary small{color:#b3c4ca}
+
+/* Unified itinerary: one timeline for walking, boarding, transferring and arriving */
+#results .metrics{margin:10px 0 14px}
+.journey-head{padding:14px 0 12px;border-bottom:1px solid #889ba133;margin-bottom:8px}
+.journey-head strong{display:block;font-size:26px;letter-spacing:-.6px;line-height:1.15}
+.journey-head small{display:block;color:#93a9b2;font-size:12px;margin-top:6px}
+.journey-meta{display:flex;gap:12px;flex-wrap:wrap;color:#9bb1b8;font-size:12px;margin-top:8px}
+.journey-step{display:grid;grid-template-columns:24px 1fr;gap:12px;min-height:64px;position:relative}
+.journey-glyph{display:flex;flex-direction:column;align-items:center;min-height:100%;gap:0;padding-top:5px}
+.journey-node{width:15px;height:15px;border-radius:50%;border:2px solid #aab6bc;flex-shrink:0;box-sizing:border-box;background:#fff}
+.journey-node.dual{background:linear-gradient(90deg,var(--from-color) 0 50%,var(--to-color) 50% 100%);border:2px solid #dee6e9}
+.journey-node.rail{background:var(--line-color);border:2px solid #f6fbff}
+.journey-node.walk{background:#728f9c;border-color:#d1dce1}
+.journey-connector{flex:1;min-height:22px;width:3px;background:var(--segment-color,#6b8490);opacity:.9;margin:3px 0}
+.journey-connector.walk{width:0;border-left:3px dashed #7e9ca8;background:transparent}
+.journey-copy{padding:1px 0 17px;min-width:0}
+.journey-copy b{font-size:14px;display:block;color:inherit;margin-bottom:4px}
+.journey-copy small{display:block;color:#9bb3bd;line-height:1.55;font-size:12px}
+.journey-copy .line-detail{font-weight:600;color:inherit;display:block;margin-top:5px}
+.journey-copy .time-detail{color:#8da5b0;margin-top:4px}
+body:not(.dark) .journey-head small,body:not(.dark) .journey-meta,body:not(.dark) .journey-copy small{color:#56717d}
+body:not(.dark) .journey-node.dual{border-color:#31434c}
+body:not(.dark) .journey-node.rail{border-color:#354850}
+
+/* Address and POI autocomplete: address and POI autocomplete */
+.address-field{position:relative;z-index:2}.address-field:focus-within{z-index:15}
+.address-suggestions{position:absolute;top:calc(100% - 8px);left:0;right:0;z-index:3000;background:#fff;color:#21353e;border:1px solid #becbd1;border-radius:10px;box-shadow:0 10px 25px #061d3030;overflow:auto;max-height:270px}
+.address-suggestions[hidden]{display:none!important}
+.address-suggestion{display:block;text-align:left;width:100%;padding:11px 12px;background:transparent!important;color:inherit!important;border:0;border-bottom:1px solid #e4ebef;border-radius:0;cursor:pointer;font:inherit;line-height:1.25}
+.address-suggestion:last-child{border-bottom:0}.address-suggestion:hover,.address-suggestion:focus,.address-suggestion.selected{background:#e8f3f7!important}
+.address-suggestion strong{display:block;font-size:13px}.address-suggestion small{display:block;margin-top:3px;color:#69808b;font-size:11px;white-space:normal}
+.address-suggestions .lookup-note{padding:12px;color:#69808b;font-size:12px}
+.swap-row{display:flex;justify-content:center;margin:-8px 0 4px;position:relative;z-index:1}
+#swap-addresses{width:auto!important;min-width:106px;padding:6px 14px!important;border:1px solid #cad8de!important;background:#f2f7f9!important;color:#214352!important;border-radius:20px!important;font-size:12px!important;font-weight:700!important;cursor:pointer}
+#swap-addresses:hover{background:#dcecf2!important}
+body.dark .address-suggestions{background:#28343b;color:#eef6fa;border-color:#51636e;box-shadow:0 10px 25px #050c1299}
+body.dark .address-suggestion{border-bottom-color:#41515c}
+body.dark .address-suggestion:hover,body.dark .address-suggestion:focus,body.dark .address-suggestion.selected{background:#38515d!important}
+body.dark .address-suggestion small,body.dark .address-suggestions .lookup-note{color:#b4c7d2}
+body.dark #swap-addresses{background:#303d44!important;border-color:#51616b!important;color:#ecf5fa!important}
+body.dark #swap-addresses:hover{background:#40535e!important}
+
+.import-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
+.import-row input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.import-btn,.import-row button{display:inline-flex;align-items:center;justify-content:center;border:1px solid #678493;border-radius:9px;padding:9px 11px;background:#174c62;color:#fff;font-size:12px;font-weight:650;cursor:pointer;width:auto!important;min-width:0!important}
+.import-row button{background:#304049}.import-row #import-status{font-size:11px;line-height:1.4;flex-basis:100%;color:#8fa7b3}
+body:not(.dark) .import-btn{background:#14556c}body:not(.dark) .import-row button{background:#e2eaf0;color:#253d49;border-color:#c7d6df}
+
+/* v22 — consistent typography, spacing, visual hierarchy */
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body,button,input,select,textarea,.leaflet-container{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.panel{padding:22px 20px 24px;width:355px}
+.panel h2{font-size:19px;line-height:1.25;letter-spacing:-.3px;font-weight:720;margin:0 36px 17px 0;padding:0}
+.panel label:not(.import-btn){font-size:11px;line-height:1.35;letter-spacing:.035em;font-weight:680;margin:16px 0 7px}
+.import-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:0 0 15px;border-bottom:1px solid #e5edf0}
+.import-btn{margin:0!important;display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:9px;padding:8px 16px!important;font-size:13px!important;line-height:1.2;font-weight:750!important;letter-spacing:0!important;background:#145874!important;border:1px solid #26718e!important;color:#fff!important;opacity:1!important;box-shadow:0 1px 3px #0002;cursor:pointer}
+.import-btn:hover,.import-btn:focus-visible{background:#1e718e!important;border-color:#4ca6c7!important;color:#fff!important;outline:2px solid #4ca6c766;outline-offset:2px}
+#import-status{font-size:11px!important;flex:1 1 120px!important;line-height:1.4!important;color:#657e8c!important;overflow-wrap:anywhere}
+.mode-tabs{margin:0 0 17px;padding:4px;gap:3px;border-radius:10px}
+.mode-tabs button{font-size:13px;font-weight:650;padding:10px 6px}
+#address-ui input,.panel select{height:44px;font-size:13px;line-height:1.3;padding:11px 12px;border-radius:9px}
+#address-ui input{margin:0 0 0}
+.address-field{margin-bottom:0}
+.swap-row{margin:9px 0 9px;justify-content:center;align-items:center}
+#swap-addresses{font-size:12px!important;min-width:80px!important;height:32px!important;padding:5px 12px!important}
+#address-go,#go{margin-top:20px;min-height:44px;border-radius:9px;font-size:13px;font-weight:700;line-height:1.3}
+.walk-status{margin:10px 0 0;font-size:11px;line-height:1.5}
+#results{margin-top:12px}
+#results .empty{padding:24px 4px 12px;font-size:12px;line-height:1.6;text-align:center}
+.app-disclaimer{margin-top:20px;padding-top:13px;border-top:1px solid #e5edf0;font-size:11px;line-height:1.6}
+.journey-copy b{font-size:13px}.journey-copy small{font-size:11px}.journey-head strong{font-size:25px}
+body.dark .import-row,body.dark .app-disclaimer{border-color:#40484e}
+body.dark #import-status{color:#c0d2d9!important}
+body.dark .import-btn{background:#17627f!important;border-color:#3988a3!important;color:#fff!important}
+body.dark .import-btn:hover,body.dark .import-btn:focus-visible{background:#237b9b!important}
+body.dark .mode-tabs{background:#33393d}
+body.dark #address-ui input,body.dark .panel select{background:#30383d;color:#f0f5f7;border-color:#52616a}
+body.dark #address-ui input::placeholder{color:#a2b2bb}
+body.dark .app-disclaimer{color:#a8bcc5}
+@media(max-width:690px){.panel{padding:19px 16px;width:auto}.panel h2{font-size:18px}}
+
+/* Minimal modal for per-line modes, outside the journey planning interface */
+#operations-settings{position:absolute;z-index:1200;top:77px;right:137px;width:auto;margin:0;padding:9px 12px;border-radius:10px;font-size:12px;font-weight:700;background:#f8fafb;color:#163f4e;border:1px solid #c9d6dc;box-shadow:0 2px 10px #0002}
+body.dark #operations-settings{background:#292f33;color:#eff8fb;border-color:#535d63}
+.service-backdrop[hidden]{display:none!important}
+.service-backdrop{position:fixed;inset:0;z-index:4000;background:#090f15a8;display:grid;place-items:center;padding:14px}
+.service-dialog{box-sizing:border-box;width:min(740px,100%);max-height:min(830px,94vh);display:flex;flex-direction:column;overflow:hidden;border-radius:17px;background:#fcfdfe;color:#21323a;box-shadow:0 20px 80px #0008;font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+.service-header{display:flex;justify-content:space-between;align-items:start;gap:12px;padding:20px 22px 13px;border-bottom:1px solid #dce3e8}
+.service-header h2{font-size:20px;margin:0 0 3px;line-height:1.3}.service-header p{margin:0;font-size:13px;color:#637884}
+.service-dialog button{width:auto;margin:0;padding:9px 12px;border-radius:9px;font-weight:650;font-size:13px}
+.service-dialog .service-close{background:transparent;color:inherit;border:1px solid #cad4da}
+.service-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 22px;font-size:12px;color:#667680;border-bottom:1px solid #e1e8ec}
+.service-summary button{background:transparent;color:#17647e;border:1px solid #a8bfca}
+.service-list{padding:4px 22px 20px;overflow-y:auto;min-height:30px}
+.service-item{padding:14px 0;border-bottom:1px solid #e3e9ed}
+.service-item-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.service-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.service-item-name{font-size:14px;font-weight:750;flex:1;overflow-wrap:anywhere}
+.service-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:9px;align-items:end}
+.service-grid label{display:block;margin:0;font-size:11px;font-weight:650;color:#657984;text-transform:none}
+.service-grid select,.service-grid input{box-sizing:border-box;width:100%;margin-top:5px;padding:8px;border-radius:8px;border:1px solid #cbd7dd;background:white;color:#24333e;font-size:13px;min-width:0}
+.service-footnote{font-size:11px;color:#71818b;line-height:1.5;margin:0;padding:8px 22px}
+.service-actions{padding:12px 22px 19px;display:flex;justify-content:flex-end}
+.service-actions button{min-width:96px}
+body.dark .service-dialog{background:#24282c;color:#f2f5f6}
+body.dark .service-header,body.dark .service-summary,body.dark .service-item{border-color:#3a4349}
+body.dark .service-header p,body.dark .service-summary,body.dark .service-grid label,body.dark .service-footnote{color:#aebec7}
+body.dark .service-grid select,body.dark .service-grid input{background:#343a40;color:#f8fafc;border-color:#56616a}
+body.dark .service-dialog .service-close{color:white;border-color:#4c575d}
+body.dark .service-summary button{color:#9edaf5;border-color:#556b75}
+@media(max-width:690px){#operations-settings{top:104px;right:9px;padding:7px 9px}.service-grid{grid-template-columns:1fr 1fr}.service-header{padding:15px}.service-list{padding:4px 15px 15px}.service-summary,.service-footnote,.service-actions{padding-left:15px;padding-right:15px}}
+</style></head><body><header class="top"><span class="logo">KML</span><div><b>KML Transit Journey</b><small>Custom transit network journey planner</small></div></header><div class="stripes"><span style="background:#dc4554"></span><span style="background:#42bddd"></span><span style="background:#d6a01f"></span><span style="background:#298b69"></span><span style="background:#e5be4d"></span><span style="background:#9762b7"></span><span style="background:#e88745"></span></div><button type="button" id="toggle-panel" class="is-open" aria-label="Close directions panel" aria-controls="journey-panel" aria-expanded="true">✕</button><main><section class="panel" id="journey-panel"><h2>Plan your journey</h2><div class="import-row"><label for="kml-upload" class="import-btn">Import KML</label><input id="kml-upload" type="file" accept=".kml,application/vnd.google-earth.kml+xml"><div id="import-status" role="status">Sample network loaded</div></div><div class="mode-tabs"><button id="address-tab" type="button" class="active">Addresses</button><button id="station-tab" type="button">Stations</button></div><div id="address-ui"><label for="address-from">STARTING ADDRESS OR PLACE</label><div class="address-field"><input id="address-from" type="text" placeholder="Search an address or place" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest-from"><div id="suggest-from" class="address-suggestions" role="listbox" hidden></div></div><div class="swap-row"><button type="button" id="swap-addresses" aria-label="Swap starting point and destination" title="Swap addresses">⇅ <span>Swap</span></button></div><label for="address-to">DESTINATION ADDRESS OR PLACE</label><div class="address-field"><input id="address-to" type="text" placeholder="Search an address or place" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest-to"><div id="suggest-to" class="address-suggestions" role="listbox" hidden></div></div><button id="address-go" type="button">Find door-to-door route →</button><div id="address-status" aria-live="polite" class="walk-status">Online address lookup and pedestrian routing are required. Walking routes use available sidewalks and footpaths when the service responds.</div></div><div id="station-ui" hidden><label for="from">FROM STATION</label><select id="from"></select><label for="to">TO STATION</label><select id="to"></select><button id="go">Find fastest route →</button></div><div id="results"><div class="empty">Choose a starting station and destination to see directions.</div></div><p class="note app-disclaimer">Travel times are estimates based on simulated train operations. Walking routes depend on available map data.</p></section><section class="mapbox"><div class="maphead">Transit Network Map <small>Click a station to select origin, then destination</small></div><div class="map-toolbar"><label for="basemap-choice">Background map:</label><select id="basemap-choice"><option value="Esri Streets">Esri Streets</option><option value="OSM France HOT">OSM France HOT</option></select></div><button id="operations-settings" type="button" title="Configure transit services" aria-haspopup="dialog">⚙ Service settings</button><button id="theme-toggle" type="button" aria-label="Turn on dark mode" aria-pressed="false">☾ Dark mode</button><div id="map" role="application" aria-label="Interactive map with custom fictional rail lines and stations"></div><div id="map-alert" style="display:none;margin:8px;padding:10px;border:1px solid #e3a8a8;border-radius:7px;background:#fff6f5;font-size:13px">Street map tiles could not load. Try the alternate map in the dropdown. If both fail, your metro journey planner still works, but your browser/network may be blocking online map tiles.</div><div class="footer">Background maps © respective providers and contributors; fictional CRT rails and stations from your KML. Internet required for street maps.</div></section></main><div id="service-modal" class="service-backdrop" hidden>
+<section class="service-dialog" role="dialog" aria-modal="true" aria-labelledby="service-title">
+<div class="service-header"><div><h2 id="service-title">Service settings</h2><p>Set modes and operating assumptions for the current network.</p></div><button class="service-close" id="service-close" type="button" aria-label="Close settings">✕</button></div>
+<div class="service-summary"><span id="service-count"></span><button id="service-reset" type="button">Reset all to Metro</button></div>
+<div id="service-list" class="service-list"></div>
+<p class="service-footnote">All lines default to Metro. These are illustrative average operating values, not observed timetables. Changes affect routing, travel times, and waiting estimates immediately. Importing a new KML starts with Metro defaults.</p>
+<div class="service-actions"><button id="service-done" type="button">Done</button></div>
+</section></div><script src="node_modules/leaflet/dist/leaflet.js"></script><script>let lines={"Summit Line":{"coords":[[-114.0108690826433,50.893922540817925],[-114.01103986372937,50.894319776181845],[-114.01133264655925,50.894623167491176],[-114.011865929571,50.89507165537145],[-114.01251423440908,50.89585649876972],[-114.01260248437484,50.89650436059085],[-114.01250837560804,50.897150683289794],[-114.01223650583728,50.897810187001284],[-114.01197879941662,50.89843584012695],[-114.01164419046802,50.899042567140185],[-114.01157099476035,50.89974161237595],[-114.01183523553647,50.900216049879845],[-114.01243125772646,50.900710645978506],[-114.013173671331,50.90109972455076],[-114.01399973717264,50.90149539434108],[-114.01482703930236,50.902024450787366],[-114.01514073519184,50.90239373536156],[-114.01527667007701,50.90293446820391],[-114.01523355623021,50.90350880314989],[-114.01505579522632,50.904042928934274],[-114.01480483851509,50.90482102713642],[-114.01490940381132,50.905836491669305],[-114.01476542135526,50.90838029668262],[-114.01494955742328,50.90940696735595],[-114.01501820162878,50.91003998413629],[-114.01515549003966,50.91079201852432],[-114.0158017697263,50.9138564777426],[-114.01703154897223,50.91634370249827],[-114.01874352758216,50.91847160620026],[-114.02021388920139,50.91980680668729],[-114.0219350287303,50.920926762694876],[-114.02662883626522,50.92412283867421],[-114.0290348039045,50.926058692847334],[-114.03019978537759,50.927347858622085],[-114.03100727745624,50.9284930192716],[-114.03233309930056,50.931180492372874],[-114.03301816860449,50.93377091143773],[-114.03313277698942,50.934863351638455],[-114.03300384255681,50.935928681829836],[-114.03272486120903,50.936733305965305],[-114.03226642767083,50.93777151004477],[-114.03180799413269,50.93852983576696],[-114.03072616393956,50.939806194772586],[-114.02920617934666,50.9411564733376],[-114.02796980713953,50.942354989919494],[-114.02728579038575,50.94300530569657],[-114.02669458957189,50.94389894042658],[-114.02641325600348,50.94465579632444],[-114.02631158369513,50.945280179814176],[-114.02623008070867,50.946013508734495],[-114.02621242065186,50.94671798712366],[-114.02625828716629,50.947448600494965],[-114.02629486314595,50.94801657821577],[-114.0263979398186,50.94885647298062],[-114.02653656598773,50.949540803672505],[-114.02676815146742,50.95038993296825],[-114.02772376701864,50.95290887066298],[-114.02821830213225,50.953878737511616],[-114.02872898180902,50.954695588726395],[-114.02911500055455,50.95574735887311],[-114.03246901400792,50.965695986181885],[-114.03322188505763,50.9669503589989],[-114.03361148201566,50.96744324967142],[-114.0341171822468,50.96814634108716],[-114.03476046680379,50.968964164370504],[-114.03793730369006,50.97198697088689],[-114.03900575567599,50.973010792555556],[-114.03989393656354,50.97440599074008],[-114.04041154892394,50.97589543893983],[-114.04055343490211,50.97718676291274],[-114.04038803658756,50.97804592136649],[-114.03991729998694,50.97918402311416],[-114.03953445002878,50.97983388272323],[-114.0375524401577,50.98257292649703],[-114.0365198694476,50.984021319151054],[-114.03552764504212,50.986067162627705],[-114.03513358943474,50.98744586319211],[-114.03500678860615,50.98894623449951],[-114.03504117116097,50.99163520639755],[-114.03491897138747,50.99318540674463],[-114.03491897138747,50.99318540674463],[-114.03493779167997,50.994381336553545],[-114.034467569286,50.99627043012836],[-114.03378249435428,50.99775384091282],[-114.03317684317096,50.998793577984145],[-114.03234342007579,50.99993538001982],[-114.02991784223781,51.00346142061778],[-114.02854946933502,51.005333732780116],[-114.02695882074704,51.007205991319154],[-114.02632733117724,51.007600857389605],[-114.02550146717704,51.00800577209395],[-114.02448207546814,51.008348049671525],[-114.02323598102646,51.00860788242929],[-114.0224749562339,51.00866469386767],[-114.02158494418865,51.00872150523645],[-114.0203552258231,51.00865003484532],[-114.01974898573411,51.00856075966851],[-114.018617773725,51.00848723650546],[-114.01754717952565,51.00841419293505],[-114.01661847130453,51.00840607697529],[-114.0146476047833,51.00875401485078],[-114.01320294755044,51.009135460544115],[-114.01242902403288,51.00938705066815],[-114.01092643506831,51.01008849273643],[-114.00999772684713,51.01054296778804],[-114.00937858803314,51.0109325142881],[-114.00867810246626,51.011504952072556],[-114.0076322629576,51.01217932733687],[-114.00721950374816,51.01253639915441],[-114.00671645346142,51.0130233108392],[-114.00598122611979,51.01385104897034],[-114.00506541662406,51.01519812061616],[-114.00299461317604,51.01927421201205],[-114.00198851260308,51.0212377725322],[-114.00092390859385,51.02334367489439],[-113.9990734261433,51.027149838925084],[-113.99834121182266,51.02868039104453],[-113.99801817609318,51.02958786268246],[-113.99769283115563,51.03042501223558],[-113.99767129544006,51.031332449715336],[-113.99782204544721,51.03218569561514],[-113.99816661689232,51.032998296153124],[-113.99876961692132,51.03370253842746],[-113.99958797410312,51.03437968436805],[-114.00077243844567,51.03507036303364],[-114.0021076527953,51.03565269194908],[-114.00339979571413,51.03622147126674],[-114.00477263011453,51.03697788975316],[-114.00538176625446,51.037573789492455],[-114.00578466173067,51.038070152676255],[-114.00628000800941,51.039022368483614],[-114.00680365978963,51.03993896895267],[-114.00725869970603,51.040910384481634],[-114.00776819873522,51.04192483190894],[-114.00846001028748,51.042891449618025],[-114.00923841158209,51.04354992495095],[-114.01028571514308,51.04413720586493],[-114.01178590672981,51.04480456150256],[-114.01312857316236,51.04533492689379],[-114.01452969549314,51.04590438958215],[-114.01543547154569,51.046340379721016],[-114.01632709484721,51.04688313722099],[-114.01763592525958,51.04805785377576],[-114.01892827668303,51.052423758465636],[-114.0194101478383,51.05356325766127],[-114.01989201899318,51.05458012883713],[-114.02078831469339,51.05591305880708],[-114.0222942351366,51.057732335779434],[-114.02364543549794,51.059271586016905],[-114.02510386918482,51.06104789544372],[-114.026403004815,51.06283927813732],[-114.02682001280607,51.06362878211678],[-114.0270816577563,51.06447217883911],[-114.02721507082987,51.06546488591286],[-114.02706936392462,51.06698416186785],[-114.02662433635658,51.070403221135166],[-114.02662433635658,51.072126708590474],[-114.02700080785394,51.073765651825084],[-114.02763633485858,51.07498585007906],[-114.02946491070321,51.07724980204915],[-114.03177752133104,51.07944606750502],[-114.03417623897928,51.08150474904539],[-114.03620212015898,51.083506815977046],[-114.03765481742761,51.085378761685206],[-114.03847801365697,51.08703649467472],[-114.0390667468888,51.089020305057886],[-114.03947834500349,51.091331807769194],[-114.03969624988792,51.093171802995414],[-114.04084674263925,51.09613045592596],[-114.04348175461348,51.09935600545799],[-114.04530689235202,51.10210586086043],[-114.04627540330466,51.10458537913948],[-114.04673611274961,51.106408478774426],[-114.04695299106447,51.10802399309165],[-114.04708156114225,51.10932900047055],[-114.04726686034007,51.11057906296338],[-114.04599737487786,51.12283040485312],[-114.04614465775,51.124565680175465],[-114.0460430347265,51.128548194016076],[-114.04574136788142,51.12960836619976],[-114.04519836756054,51.130971408961784],[-114.04455481162489,51.13189270211626],[-114.04377047782793,51.13286445716952],[-114.04250347707875,51.134075967297235],[-114.04090869255344,51.13526051916014],[-114.03881713576158,51.1372417236899],[-114.03516090880203,51.1411480114339],[-114.02785253922735,51.14738113715529],[-114.02459739736338,51.14970863597392],[-114.01789233369266,51.15441628049223]],"stations":[{"name":"Sikome","coord":[-114.0108690826433,50.893922540817925],"km":0},{"name":"Deer Run","coord":[-114.01874352758216,50.91847160620026],"km":2.924},{"name":"Deer Valley","coord":[-114.03233309930056,50.931180492372874],"km":4.655},{"name":"Bonavista Downs","coord":[-114.02920617934666,50.9411564733376],"km":5.835},{"name":"Diamond Cove","coord":[-114.02676815146742,50.95038993296825],"km":6.917},{"name":"Sue Higgins Park","coord":[-114.03361148201566,50.96744324967142],"km":8.879},{"name":"East Fairview Mall","coord":[-114.0375524401577,50.98257292649703],"km":10.727},{"name":"Auto Mall","coord":[-114.03491897138747,50.99318540674463],"km":11.937},{"name":"Auto Mall","coord":[-114.03491897138747,50.99318540674463],"km":11.937},{"name":"Highfield","coord":[-114.02695882074704,51.007205991319154],"km":13.612},{"name":"Valleyfield","coord":[-114.00867810246626,51.011504952072556],"km":15.057},{"name":"Dover","coord":[-114.00092390859385,51.02334367489439],"km":16.496},{"name":"Southview","coord":[-114.00477263011453,51.03697788975316],"km":18.255},{"name":"Calgary Zoo","coord":[-114.01763592525958,51.04805785377576],"km":19.838},{"name":"Mayland Heights","coord":[-114.02364543549794,51.059271586016905],"km":21.166},{"name":"Vista","coord":[-114.02706936392462,51.06698416186785],"km":22.077},{"name":"32 Ave","coord":[-114.03417623897928,51.08150474904539],"km":23.837},{"name":"Skyline","coord":[-114.04084674263925,51.09613045592596],"km":25.555},{"name":"Thorncliffe","coord":[-114.04726686034007,51.11057906296338],"km":27.245},{"name":"Huntington Hills","coord":[-114.04614465775,51.124565680175465],"km":28.805},{"name":"Casino","coord":[-114.03516090880203,51.1411480114339],"km":30.861},{"name":"Country Hills","coord":[-114.01789233369266,51.15441628049223],"km":32.77}],"color":"#dc4554"},"Glacier Line":{"coords":[[-114.22670914913903,51.052662015218004],[-114.21093871751378,51.05256733588712],[-114.1876394632472,51.05261925329509],[-114.185416945074,51.05261925329509],[-114.18417962954982,51.05253364591661],[-114.18173361020717,51.052241539566324],[-114.17911738968695,51.05194771488814],[-114.17844880146112,51.05200775555505],[-114.17707065742871,51.05222075930979],[-114.16929773212848,51.05384867015732],[-114.16849883910669,51.05393181179511],[-114.16784808518827,51.05391850914344],[-114.16694544711504,51.05379088342417],[-114.16616771682214,51.05358136557345],[-114.16547521796082,51.0532443795847],[-114.16385191913616,51.052421983394765],[-114.1548614966664,51.04943237307961],[-114.15278874448808,51.04886199362497],[-114.1415595983429,51.04528438302589],[-114.14075983305065,51.044956858729705],[-114.13906777642507,51.04427834937772],[-114.13871558620468,51.04400617555234],[-114.1385103858945,51.04379206624006],[-114.13825358052532,51.04310470170705],[-114.13773883540375,51.04244741347645],[-114.13673362581636,51.04187997601247],[-114.13562727071468,51.04163855630236],[-114.11905534517035,51.04169411652802],[-114.11489551020713,51.04230881892025],[-114.11210211465902,51.0431178740933],[-114.10847833297021,51.04491687725243],[-114.1065719972978,51.04579985298517],[-114.10510658849131,51.046413100552],[-114.1042093165936,51.04675498779298],[-114.10315352299477,51.047071287194086],[-114.10254523143925,51.04725293718246],[-114.10182381366303,51.047410370821524],[-114.1009874127746,51.04750278864935],[-114.10036391393061,51.04750916228565],[-114.09940632169616,51.047457156105764],[-114.09857498990385,51.04740935375676],[-114.09780369436163,51.04735729118258],[-114.09710415907318,51.04727443356825],[-114.09648066022913,51.04715652055367],[-114.09590643411968,51.04704681230078],[-114.09483041611884,51.04699661240332],[-114.09396530467802,51.04708105292144],[-114.09353223731836,51.04711456201352],[-114.09300848622217,51.04720102499425],[-114.0921128965698,51.047492504710874],[-114.09070367497867,51.04807637397619],[-114.08980941898426,51.048403787869375],[-114.08754048725444,51.04905909035628],[-114.08716947259757,51.04908953014336],[-114.08119972992154,51.04889596446685],[-114.06810331199398,51.04855776933215],[-114.0657193996517,51.04849302472192],[-114.0556218799764,51.048240318043554],[-114.05496509069815,51.04827257592174],[-114.05411604954611,51.048359627591736],[-114.05366963808336,51.048404788498885],[-114.05317704612486,51.04848543286661],[-114.05265366716895,51.04861123780026],[-114.05221363505126,51.04874567852906],[-114.05160966645667,51.04896707198617],[-114.05111844925625,51.04904472305964],[-114.05053550318235,51.04934108636226],[-114.0499677643977,51.04955140755578],[-114.04933412736096,51.04970436782389],[-114.04836426258993,51.04977745973784],[-114.04779145470872,51.04974877977159],[-114.04711913921,51.04963403078341],[-114.04654126223261,51.04952887049339],[-114.04591269429204,51.049404589843334],[-114.04510670798174,51.049289868947085],[-114.04428304750155,51.04922187892521],[-114.04324895185795,51.049247372519574],[-114.04219303465118,51.049265934163145],[-114.0413088949714,51.049246696541644],[-114.04066117880859,51.0492339799919],[-114.03927994684938,51.048867198119126],[-114.0385956188498,51.048577205273574],[-114.03799746548702,51.04835731937837],[-114.03693158829913,51.04800163996151],[-114.0362573984919,51.0478932891742],[-114.03554772501116,51.04782955329853],[-114.03472146231542,51.04782955329853],[-114.03383204665852,51.04783516115529],[-114.03280498975698,51.04784480850171],[-114.03146563745145,51.0478852898421],[-114.02891571671512,51.047585727087124],[-114.0264301879165,51.04735902966041],[-114.02373860491667,51.0474804748485],[-114.01763592525958,51.04805785377576],[-114.01639977153576,51.0480180008839],[-114.01546588815472,51.04793815475173],[-114.01452453370689,51.04783482425901],[-114.01352142778342,51.04760541863496],[-114.012662255073,51.0473236056325],[-114.01166860315567,51.04701830627849],[-114.00752909049851,51.045690178388384],[-114.00545679893389,51.04530243177891],[-114.00317856003232,51.045135140394024],[-114.00177400934791,51.04512774704432],[-114.00074320647599,51.04523216258923],[-113.99934280307741,51.04545377191201],[-113.99808766381341,51.045730899231955],[-113.9970921493533,51.04606119435084],[-113.99565770448038,51.04652619755822],[-113.99475011235467,51.04706075959939],[-113.9935024441578,51.04774650547313],[-113.99224728885707,51.04848874328499],[-113.99116398413543,51.04910401731425],[-113.98934412308608,51.050036145130036],[-113.98816369449264,51.050618522670334],[-113.98674288207621,51.05111746736236],[-113.98565957735428,51.05146500801581],[-113.98398889256123,51.05180686046262],[-113.9826441004929,51.051985324953705],[-113.98166383458681,51.052144791615234],[-113.97761690071991,51.05254454221088],[-113.97521779926376,51.0527718498694],[-113.97396666117629,51.052813653791844],[-113.97228498244266,51.05285593815631],[-113.97002878007095,51.05284334199149],[-113.96662969839667,51.05284963206705],[-113.9634498447,51.05287067049895],[-113.96061907519515,51.052865709862004],[-113.95909184183643,51.05286353093379],[-113.95837881005355,51.05291004368266],[-113.95780703863102,51.05300306852163],[-113.95559525110997,51.05335188384569],[-113.95321978186882,51.05376042797272],[-113.95235203564215,51.0538872783568],[-113.95172645115281,51.05388305001634],[-113.95104608438021,51.053811618588554],[-113.95048776704056,51.05368899635579],[-113.94973437496805,51.05343529415322],[-113.948906989031,51.05311393603512],[-113.94799095895479,51.052791628472704],[-113.9471097592986,51.05255060674287],[-113.94643708780484,51.0524491235343],[-113.94572405602145,51.05242375269734],[-113.94438670039273,51.05241909402585],[-113.93527328893794,51.052426507656605],[-113.93133464113691,51.052435364818734]],"stations":[{"name":"Wentworth","coord":[-114.22670914913903,51.052662015218004],"km":0},{"name":"Springside","coord":[-114.21093871751378,51.05256733588712],"km":1.104},{"name":"Strathcona Park","coord":[-114.18173361020717,51.052241539566324],"km":3.151},{"name":"Wildwood","coord":[-114.15278874448808,51.04886199362497],"km":5.36},{"name":"Westbrook Mall","coord":[-114.13562727071468,51.04163855630236],"km":6.852},{"name":"Scarboro","coord":[-114.11210211465902,51.0431178740933],"km":8.526},{"name":"Sunalta","coord":[-114.09483041611884,51.04699661240332],"km":9.89},{"name":"Aquitane","coord":[-114.08119972992154,51.04889596446685],"km":10.9},{"name":"Union","coord":[-114.06810331199398,51.04855776933215],"km":11.818},{"name":"Reconciliation","coord":[-114.05160966645667,51.04896707198617],"km":12.988},{"name":"McDougall Park","coord":[-114.04066117880859,51.0492339799919],"km":13.784},{"name":"Calgary Zoo","coord":[-114.01763592525958,51.04805785377576],"km":15.443},{"name":"Albert Park","coord":[-114.00177400934791,51.04512774704432],"km":16.617},{"name":"Northgale Village","coord":[-113.98166383458681,51.052144791615234],"km":18.261},{"name":"Forest Way","coord":[-113.95559525110997,51.05335188384569],"km":20.097},{"name":"Abbercove Park","coord":[-113.93133464113691,51.052435364818734],"km":21.839}],"color":"#42bddd"},"Skylink":{"coords":[[-114.00903399778849,51.132145689749734],[-114.00862208288248,51.131987431857226],[-114.00823538725643,51.13187137572484],[-114.00782347235042,51.131860825152785],[-114.00740315101768,51.13197688131166],[-114.00696601683171,51.1321404144951],[-114.00673904331228,51.132303947099814],[-114.00659613405918,51.132472754341876],[-114.00656250835243,51.13265211136061],[-114.00654831157772,51.13317847544465],[-114.00652594299243,51.13327673127682],[-114.00640850791848,51.1333363865015],[-114.00599468908695,51.133353932141205],[-114.0052703692902,51.13340661515875],[-114.00453779811528,51.13356803454647],[-114.00374930547667,51.133834726211006],[-114.00290506811984,51.13403991786083],[-114.00248006499544,51.13409255395797],[-114.00151301636458,51.1341903534545],[-114.00088622075032,51.13421443385647],[-114.00057921881637,51.134310755338646],[-114.00045130134373,51.13452747793838],[-114.00046409309118,51.13506526666362],[-114.00056642706897,51.135787659571236],[-114.00083683737518,51.13639431240824],[-114.00141246600083,51.13745378764099],[-114.00162992570387,51.1382965346703],[-114.00174505142911,51.13904295490653],[-114.00178342667084,51.13935596625308],[-114.00197530287949,51.139540561693025],[-114.00325447760338,51.13959674276731],[-114.00491740474467,51.139620820349705],[-114.02301212157954,51.13952575171177],[-114.02525171835606,51.13964349331414],[-114.02726724390504,51.13988918442706],[-114.02867235314466,51.140113195772784],[-114.02992773762946,51.140337206031575],[-114.03516090880203,51.1411480114339]],"stations":[{"name":"YYC","coord":[-114.00903399778849,51.132145689749734],"km":0},{"name":"Casino","coord":[-114.03516090880203,51.1411480114339],"km":3.67}],"color":"#d6a01f"},"Evergreen Line":{"coords":[[-114.09390482041323,50.87780717147348],[-114.09350286620418,50.89389396337748],[-114.09328241005767,50.89649921124743],[-114.09335986277068,50.897125607082245],[-114.09360617970185,50.897937458923906],[-114.09394006932297,50.89867207963621],[-114.09438502894045,50.89936363505697],[-114.09482998855822,50.8999048451785],[-114.09546429911597,50.90057111978834],[-114.09622708703176,50.9011173269206],[-114.09696603782544,50.90169359355468],[-114.09777531305451,50.902354206604116],[-114.09836329540633,50.90294047962851],[-114.09884798356131,50.903932617159484],[-114.09900179958561,50.90746919583131],[-114.09903390190914,50.907914537742414],[-114.09916231120349,50.908339632864454],[-114.09945805800209,50.90899467639534],[-114.09969470805743,50.909248646728315],[-114.09988215899796,50.90955398872569],[-114.10006228761245,50.90989598450403],[-114.10012181661233,50.91042773467251],[-114.10010197361248,50.9112222206638],[-114.09998821473442,50.91762031221231],[-114.10035229003796,50.91822877120097],[-114.10145732795945,50.918698601074794],[-114.10262661227205,50.919046920161435],[-114.10396293720044,50.91949244077287],[-114.1053506592412,50.9199460573773],[-114.10748630537063,50.920555518868184],[-114.10886287416542,50.92078879390789],[-114.11054799016381,50.92107806761385],[-114.11248795305664,50.92136431036457],[-114.11457120709872,50.921421215586946],[-114.11551215624809,50.921665457634646],[-114.11625384557709,50.92211904660678],[-114.11679627508659,50.92288664863983],[-114.11713944477617,50.923758908305075],[-114.11739440508552,50.92474106840049],[-114.1179540584804,50.935833352119886],[-114.1180300980273,50.9505249628229],[-114.11800164414052,50.96125108385692],[-114.11796322558155,50.97221953160073],[-114.11804142840134,51.00031498590198],[-114.11803028728599,51.01616757224036],[-114.1179124159986,51.02717176437375],[-114.11786968459103,51.02915923773452],[-114.11791578358975,51.02964053189149],[-114.11799216037207,51.02999699895577],[-114.11829866681421,51.0337212635491],[-114.11825498356859,51.034230718706425],[-114.11805245215783,51.03464277392797],[-114.11783006472592,51.03493745359674],[-114.11732327741277,51.03533584650705],[-114.11695564173704,51.03552857606158],[-114.11658234854838,51.03568839950026],[-114.11610129956426,51.0358647080609],[-114.11472881922577,51.0363555766794],[-114.11413143518018,51.0367077484392],[-114.11375807015213,51.03705991752241],[-114.11339715062468,51.037576427335466],[-114.11290871113454,51.03882053882501],[-114.11261001911174,51.03967352709711],[-114.11248556410254,51.040236960279515],[-114.11217414291889,51.041138300288],[-114.11199990590575,51.04203819656786],[-114.11210211465902,51.0431178740933],[-114.10847833297021,51.04491687725243],[-114.1065719972978,51.04579985298517],[-114.10510658849131,51.046413100552],[-114.1042093165936,51.04675498779298],[-114.10315352299477,51.047071287194086],[-114.10254523143925,51.04725293718246],[-114.10182381366303,51.047410370821524],[-114.1009874127746,51.04750278864935],[-114.10036391393061,51.04750916228565],[-114.09940632169616,51.047457156105764],[-114.09857498990385,51.04740935375676],[-114.09780369436163,51.04735729118258],[-114.09710415907318,51.04727443356825],[-114.09648066022913,51.04715652055367],[-114.09590643411968,51.04704681230078],[-114.09483041611884,51.04699661240332],[-114.09396530467802,51.04708105292144],[-114.09353223731836,51.04711456201352],[-114.09300848622217,51.04720102499425],[-114.0921128965698,51.047492504710874],[-114.09070367497867,51.04807637397619],[-114.08980941898426,51.048403787869375],[-114.08754048725444,51.04905909035628],[-114.08716947259757,51.04908953014336],[-114.08119972992154,51.04889596446685],[-114.06810331199398,51.04855776933215]],"stations":[{"name":"Silverado","coord":[-114.09390482041323,50.87780717147348],"km":0},{"name":"Somerset","coord":[-114.09350286620418,50.89389396337748],"km":1.791},{"name":"Shannon","coord":[-114.09945805800209,50.90899467639534],"km":3.583},{"name":"Millrise","coord":[-114.09998821473442,50.91762031221231],"km":4.552},{"name":"Woodridge","coord":[-114.1179540584804,50.935833352119886],"km":7.381},{"name":"Woodbine","coord":[-114.1180300980273,50.9505249628229],"km":9.017},{"name":"Braeside","coord":[-114.11800164414052,50.96125108385692],"km":10.211},{"name":"Bayview","coord":[-114.11796322558155,50.97221953160073],"km":11.432},{"name":"Glenmore","coord":[-114.11804142840134,51.00031498590198],"km":14.56},{"name":"Garrison Woods","coord":[-114.11803028728599,51.01616757224036],"km":16.324},{"name":"Currie","coord":[-114.1179124159986,51.02717176437375],"km":17.549},{"name":"Richmond Knob","coord":[-114.11732327741277,51.03533584650705],"km":18.477},{"name":"Scarboro","coord":[-114.11210211465902,51.0431178740933],"km":19.486},{"name":"Sunalta","coord":[-114.09483041611884,51.04699661240332],"km":20.85},{"name":"Aquitane","coord":[-114.08119972992154,51.04889596446685],"km":21.86},{"name":"Union","coord":[-114.06810331199398,51.04855776933215],"km":22.778}],"color":"#298b69"},"Prairie Line":{"coords":[[-114.06810331199398,51.04855776933215],[-114.08119972992154,51.04889596446685],[-114.08696457989845,51.050157468111394],[-114.08924942104636,51.05089707121954],[-114.09218232060357,51.0515977895399],[-114.0947386505963,51.05255182243906],[-114.09553901207926,51.052728496027356],[-114.09657136554534,51.05322935847977],[-114.09707474173393,51.053694099977406],[-114.09774524231938,51.05465464270537],[-114.09841915006791,51.05534309481922],[-114.09997562508221,51.05633465780747],[-114.10163726732702,51.05712789291107],[-114.10369854504847,51.0574716239023],[-114.10549731470758,51.05747876287168],[-114.1115009630181,51.05753997633613],[-114.11268328560783,51.057766828001746],[-114.11406473621241,51.05807972502663],[-114.11515994029577,51.058463021000534],[-114.11604357086264,51.05899493668656],[-114.11677424398124,51.05959770939924],[-114.1171443337451,51.06031341383638],[-114.11803080116084,51.061366002237605],[-114.118151553519,51.066975620673304],[-114.1184343673558,51.074285367559185],[-114.1256659559956,51.08313213585356],[-114.12767360576049,51.08456843185948],[-114.1308344358053,51.08650615665118],[-114.1329031924447,51.08764501439245],[-114.13537872707502,51.08903204684336],[-114.13649446099265,51.089944545508445],[-114.14214674450875,51.093805267449085],[-114.16063509149137,51.1033028777064],[-114.17844670200122,51.11071544019018],[-114.20720040541204,51.1227265897073],[-114.23571932855225,51.13452309951958],[-114.25697486006379,51.14346448588455]],"stations":[{"name":"Union","coord":[-114.06810331199398,51.04855776933215],"km":0},{"name":"Aquitane","coord":[-114.08119972992154,51.04889596446685],"km":0.917},{"name":"Kensington","coord":[-114.0947386505963,51.05255182243906],"km":1.952},{"name":"Queen Elizabeth","coord":[-114.10549731470758,51.05747876287168],"km":2.948},{"name":"St. Andrews","coord":[-114.118151553519,51.066975620673304],"km":4.656},{"name":"University","coord":[-114.1184343673558,51.074285367559185],"km":5.47},{"name":"Charleswood","coord":[-114.1256659559956,51.08313213585356],"km":6.577},{"name":"Northland Village","coord":[-114.14214674450875,51.093805267449085],"km":8.235},{"name":"Dalhousie","coord":[-114.16063509149137,51.1033028777064],"km":9.905},{"name":"Silver Springs","coord":[-114.17844670200122,51.11071544019018],"km":11.398},{"name":"Crowfoot","coord":[-114.20720040541204,51.1227265897073],"km":13.812},{"name":"Tuscany","coord":[-114.23571932855225,51.13452309951958],"km":16.198},{"name":"Rocky Ridge","coord":[-114.25697486006379,51.14346448588455],"km":17.985}],"color":"#e5be4d"},"Alpine Line":{"coords":[[-114.11607759139736,51.1568218283133],[-114.10320430842722,51.15275537244173],[-114.10216137967177,51.15233310050954],[-114.10125859285222,51.15191706000411],[-114.10046635135768,51.151466345223696],[-114.09947144343403,51.15078448629066],[-114.09856865661453,51.14994081637826],[-114.09743263537268,51.1488481897149],[-114.09606924303296,51.14743815301031],[-114.09452160848554,51.1459009327686],[-114.09242059266063,51.14389444110341],[-114.09167035809173,51.143146749507935],[-114.09071229860979,51.14234917651078],[-114.0893489062704,51.14141287758247],[-114.0876170295146,51.140569036352474],[-114.086456303604,51.140060412270685],[-114.08228577281994,51.13836994826349],[-114.08018258719198,51.13646848838937],[-114.07904703817866,51.135408385199185],[-114.0779704002336,51.13420388034899],[-114.07671376793905,51.13295072515626],[-114.07393661498958,51.13025627812152],[-114.07291185124626,51.12867459100886],[-114.07224713962904,51.12742310787499],[-114.07142722417836,51.12521635999178],[-114.07158667029637,51.10534487263095],[-114.07168367546086,51.08740311762742],[-114.07154669759348,51.066878739012026],[-114.07157129763186,51.06174012328998],[-114.0715567971356,51.05766719916801],[-114.07158008937438,51.051422401573376],[-114.07150367971718,51.050365184379615],[-114.07117095014883,51.04975587036981],[-114.07027772216566,51.04910968582871],[-114.06983207829603,51.048940117520715],[-114.06810331199398,51.04855776933215],[-114.0657193996517,51.04849302472192],[-114.06425231728025,51.04826972205697],[-114.06342707231966,51.047930140670616],[-114.06276687635142,51.047335867254105],[-114.06174657349106,51.04667555451533],[-114.06127257622745,51.04581034347768],[-114.06083658766386,51.044869238368705],[-114.06075364084256,51.043736189733096],[-114.06125073829799,51.036353433920425],[-114.06127838448867,51.03564185091673],[-114.06121553005846,51.035314724438024],[-114.06093936442244,51.035050280242245],[-114.06053139246069,51.03471873613327],[-114.06013885059258,51.03431486140997],[-114.0598501319734,51.03384121872574],[-114.0597204399914,51.033215544536915],[-114.05965508803564,51.032045482333785],[-114.05967280889263,51.030420193546206],[-114.05973700164645,51.02883888422869],[-114.05965405118002,51.02841840537263],[-114.05956140480754,51.02812341998646],[-114.05948612962993,51.02793768748435],[-114.05939927365563,51.02771553586689],[-114.05902782771818,51.025281144964026],[-114.05902261422489,51.024979460376215],[-114.05917380553291,51.02431050059053],[-114.05939188973372,51.02337498540305],[-114.05952819255265,51.02306361699496],[-114.06354919584862,51.01740879313769],[-114.06403023673931,51.016695776405555],[-114.06441566988275,51.01593523284734],[-114.06562084256257,51.01338768583176],[-114.06806545426554,51.008343869973885],[-114.07125975939977,51.0032192732138],[-114.07153521082307,51.00247865339554],[-114.07162222868953,51.00141307419952],[-114.07164423600454,50.99424391676101],[-114.07157691264996,50.98210486885026],[-114.07157995869153,50.965043561407185],[-114.07106528101292,50.95049103294946],[-114.07095588963801,50.9502997555463],[-114.07070944833964,50.95016241295971],[-114.06997960295615,50.9500668700517],[-114.06884218157927,50.94994146968665],[-114.06771423871362,50.94992355532116],[-114.06570479428103,50.949786211623405],[-114.06396074816962,50.94969663942774],[-114.06177239233341,50.94956426070229],[-114.05985504886246,50.94915415766499],[-114.05796137629795,50.94871422492926],[-114.05561795649987,50.9483190275661],[-114.05373611938904,50.94825191824614],[-114.0497314590578,50.94824784691295],[-114.03531270213261,50.94824958947848],[-114.03324995365426,50.948339478058784],[-114.03134391143146,50.948604491666316],[-114.02985851300923,50.94896060132251],[-114.02885774866223,50.9493176557466],[-114.02676815146742,50.95038993296825],[-114.0258557698566,50.9509853272767],[-114.02540020386391,50.9513291841771],[-114.02516812307493,50.95163784096076],[-114.02483334330566,50.95230853243126],[-114.02463763516141,50.95254007589128],[-114.02439896669273,50.95268140704695],[-114.02405051072827,50.952762597090725],[-114.02364954770059,50.952756583018385],[-114.02254705149193,50.95272774216494],[-114.02105089540646,50.952534073158915],[-114.0193497864322,50.95232749199661],[-114.01727976225936,50.95204344139856],[-114.01510726164173,50.95170774299936],[-114.01266832226946,50.951204190854526],[-114.01037284991907,50.950571515041446],[-114.00413993326424,50.94885358822063],[-114.00168064966346,50.94827511828058],[-113.99970333398556,50.947898494111485],[-113.997526753937,50.94757980973847],[-113.9944247617413,50.94726064085134],[-113.99010688367485,50.946799637446105],[-113.98577210659153,50.946127686644274],[-113.98356487048585,50.94538405804815],[-113.98021313548861,50.94378730710383],[-113.97815519326656,50.94206731798511],[-113.97695468007771,50.940658292970795],[-113.97611163850951,50.939393002666435],[-113.97558752126207,50.937360259191024],[-113.9755108811197,50.93591134787579],[-113.97548889759912,50.93347056936051],[-113.97557060057642,50.931933937033506],[-113.97548615189987,50.916384175932535],[-113.97539967080758,50.900067188267855],[-113.97524228538686,50.89758627562804],[-113.97495456942158,50.895971209968735],[-113.97373357602237,50.89377065058903],[-113.97264944730063,50.89204094290119],[-113.96934603612681,50.886673872011244],[-113.965640243042,50.88048788183906]],"stations":[{"name":"Kincora","coord":[-114.11607759139736,51.1568218283133],"km":0},{"name":"Sandstone","coord":[-114.09242059266063,51.14389444110341],"km":2.26},{"name":"Beddington Heights","coord":[-114.07142722417836,51.12521635999178],"km":4.875},{"name":"Thorncliffe","coord":[-114.07158667029637,51.10534487263095],"km":7.087},{"name":"Queen's Park","coord":[-114.07168367546086,51.08740311762742],"km":9.084},{"name":"Mt. Pleasant","coord":[-114.07154669759348,51.066878739012026],"km":11.369},{"name":"Sunnyside","coord":[-114.0715567971356,51.05766719916801],"km":12.394},{"name":"Union","coord":[-114.06810331199398,51.04855776933215],"km":13.539},{"name":"360","coord":[-114.06075364084256,51.043736189733096],"km":14.401},{"name":"Erlton","coord":[-114.05967280889263,51.030420193546206],"km":15.912},{"name":"Ebloya","coord":[-114.06562084256257,51.01338768583176],"km":17.899},{"name":"58th Ave","coord":[-114.07162222868953,51.00141307419952],"km":19.302},{"name":"Meadowlark Park","coord":[-114.07164423600454,50.99424391676101],"km":20.1},{"name":"Kingsland","coord":[-114.07157691264996,50.98210486885026],"km":21.451},{"name":"Wyldewood","coord":[-114.07157995869153,50.965043561407185],"km":23.35},{"name":"Southcentre","coord":[-114.07106528101292,50.95049103294946],"km":24.971},{"name":"Bonavista","coord":[-114.0497314590578,50.94824784691295],"km":26.514},{"name":"Diamond Cove","coord":[-114.02676815146742,50.95038993296825],"km":28.189},{"name":"Douglasdale","coord":[-114.00413993326424,50.94885358822063],"km":29.998},{"name":"Prestwick","coord":[-113.97557060057642,50.931933937033506],"km":33.198},{"name":"McKenzie","coord":[-113.97548615189987,50.916384175932535],"km":34.929},{"name":"Auburn Bay","coord":[-113.97539967080758,50.900067188267855],"km":36.746},{"name":"Cranston","coord":[-113.965640243042,50.88048788183906],"km":39.047}],"color":"#9762b7"},"Canyon Line":{"coords":[[-114.21218173669922,51.0199729134861],[-114.19098569888433,51.012642329849825],[-114.18750435985692,51.01152217281199],[-114.18545370810068,51.011092105333034],[-114.1817795143387,51.01016658926849],[-114.17870227657443,51.00961726141006],[-114.17528942922536,51.009187708915846],[-114.17278470081249,51.00884549821825],[-114.17040742553462,51.00845296390409],[-114.16834639186908,51.00806571916064],[-114.16620028368544,51.007870217493604],[-114.16488825686747,51.00785398065619],[-114.1605133273626,51.00831122444259],[-114.15879579930765,51.00840128117133],[-114.15647713643432,51.00856338284288],[-114.154000168371,51.00861366820686],[-114.152669084129,51.00866770191291],[-114.15103743247681,51.00864969068462],[-114.14788863104366,51.008631679449394],[-114.1455985936372,51.00865869629982],[-114.14141326688735,51.00861558350735],[-114.14007140051069,51.00864675688024],[-114.13915638980006,51.00858918408676],[-114.13854057034064,51.00847450301222],[-114.13775518614727,51.00828739047731],[-114.13712230373909,51.00805229929949],[-114.13653517186611,51.007764430928205],[-114.1360980370273,51.007469920642734],[-114.13092968090945,51.00293424716696],[-114.13042274954086,51.0024998278154],[-114.12950230169076,51.0019517647888],[-114.12862095810169,51.00161519677022],[-114.12779234447072,51.00142083947844],[-114.12722738063144,51.001340252069696],[-114.1264569484245,51.001261775864606],[-114.12489764822823,51.00125703541653],[-114.12342308460484,51.001258111593785],[-114.12273759514642,51.00122492844386],[-114.12188638296215,51.0011253788513],[-114.12107648204801,51.00098382653783],[-114.11804142840134,51.00031498590198],[-114.1078680234545,50.99818493084754],[-114.10631663780549,50.99782673939035],[-114.10502579517492,50.99747744828889],[-114.10375898322474,50.99709614179636],[-114.10246523287111,50.996603353954555],[-114.10117202163315,50.99608470628468],[-114.09936666233335,50.995225536517154],[-114.09779964914463,50.99463024090019],[-114.09624353470383,50.994306468177626],[-114.09515119994126,50.99416034116359],[-114.0941219113729,50.994149687011515],[-114.09194991471657,50.994218039667885],[-114.08973137527443,50.99431568614477],[-114.08864069432042,50.99436806049002],[-114.07673650840945,50.99435786524353],[-114.07164423600454,50.99424391676101],[-114.06768833524939,50.99418383044417],[-114.06615242332771,50.99412524241609],[-114.0599932613805,50.99386159537471],[-114.05708446839816,50.99388194574726],[-114.05427583418827,50.99401784548132],[-114.04648189210297,50.9944580607536],[-114.04423232413728,50.99447758996433],[-114.04279802629765,50.994396068043045],[-114.04090528635413,50.99425936315441],[-114.03912114624336,50.99408359913437],[-114.03719737777607,50.993732069097035],[-114.03598726535336,50.99347818463647],[-114.03491897138747,50.99318540674463],[-114.03359372083793,50.99264585142751],[-114.03320586429226,50.992460316269785],[-114.03196472334548,50.99192323663161],[-114.03087872501732,50.99127873286159],[-114.0299168407837,50.990722108766704],[-114.02899303629209,50.99009356731975],[-114.01898905480044,50.98211447549832],[-114.0177944566392,50.98146006818277],[-114.01579547624715,50.9806991619636],[-114.01501814954031,50.980465504814845],[-114.01405626530664,50.98016270973321],[-114.0121169825776,50.979762235785586],[-114.0109068701546,50.979576649126614],[-114.00869576723073,50.9793690678095],[-113.99703666667892,50.97913598168702],[-113.99120911383068,50.979150247247645],[-113.98608963364381,50.979146467091425],[-113.98176635344146,50.97960694848493],[-113.95863675547434,50.97961170321514]],"stations":[{"name":"Springbank","coord":[-114.21218173669922,51.0199729134861],"km":0},{"name":"Westhills Towne Centre","coord":[-114.16488825686747,51.00785398065619],"km":3.61},{"name":"Mount Royal University","coord":[-114.14141326688735,51.00861558350735],"km":5.261},{"name":"Glenmore","coord":[-114.11804142840134,51.00031498590198],"km":7.276},{"name":"Mayfair","coord":[-114.08864069432042,50.99436806049002],"km":9.49},{"name":"Meadowlark Park","coord":[-114.07164423600454,50.99424391676101],"km":10.681},{"name":"Centennial","coord":[-114.05427583418827,50.99401784548132],"km":11.9},{"name":"Auto Mall","coord":[-114.03491897138747,50.99318540674463],"km":13.278},{"name":"Riverbend","coord":[-114.01579547624715,50.9806991619636],"km":15.226},{"name":"Barlow Trail","coord":[-113.98176635344146,50.97960694848493],"km":17.641},{"name":"Great Plains","coord":[-113.95863675547434,50.97961170321514],"km":19.262}],"color":"#e88745"}};const originalLines=structuredClone(lines);let names=Object.keys(lines);const stationInstances=[];const nodeMap={};let nodes=[],adj=[];
+function geoDist(a,b){const lat=(a[1]+b[1])/2*Math.PI/180;return Math.hypot((a[0]-b[0])*111.32*Math.cos(lat),(a[1]-b[1])*111.32)}
+function addNode(line,s){let id=nodes.length;nodes.push({...s,line,id});adj.push([]);return id}
+function edge(a,b,time,dist,transfer=false){adj[a].push({to:b,time,dist,transfer});adj[b].push({to:a,time,dist,transfer})}
+const SERVICE_PRESETS={
+ "Metro":{speed:60,frequency:4,dwell:35},
+ "Light rail (LRT)":{speed:36,frequency:8,dwell:30},
+ "Tram / streetcar":{speed:23,frequency:10,dwell:25},
+ "Bus rapid transit (BRT)":{speed:30,frequency:7,dwell:20},
+ "Local bus":{speed:20,frequency:15,dwell:20},
+ "Commuter rail":{speed:75,frequency:20,dwell:45},
+ "Regional rail":{speed:90,frequency:30,dwell:50},
+ "High-speed rail":{speed:165,frequency:40,dwell:90},
+ "Airport express":{speed:75,frequency:15,dwell:45},
+ "Airport people mover":{speed:28,frequency:4,dwell:22},
+ "Ferry":{speed:22,frequency:25,dwell:90},
+ "Cable car / gondola":{speed:18,frequency:2,dwell:20},
+ "Custom":{speed:60,frequency:6,dwell:35}
+};
+let serviceSettings={};
+function resetServiceSettings(){serviceSettings=Object.fromEntries(Object.keys(lines).map(line=>[line,{mode:'Metro',...SERVICE_PRESETS.Metro}]));}
+resetServiceSettings();
+function serviceOf(line){return serviceSettings[line]||SERVICE_PRESETS.Metro;}
+function segmentMinutes(line,d){const o=serviceOf(line);return d/o.speed*60+o.dwell/60;}
+function firstWait(line){return serviceOf(line).frequency/2;}
+function transferMinutes(nextLine,d){return 3+d/4*60+firstWait(nextLine);}
+let places=[],from=document.querySelector('#from'),to=document.querySelector('#to');
+function rebuildGraph(){
+ nodes=[];adj=[];places=[];names=Object.keys(lines);
+ for(const line of names){let prev=null;for(const s of lines[line].stations){let id=addNode(line,s);if(prev!==null){let d=Math.abs(s.km-nodes[prev].km);edge(prev,id,segmentMinutes(line,d),d)}prev=id}}
+ for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+  if(nodes[i].line===nodes[j].line)continue;
+  let d=geoDist(nodes[i].coord,nodes[j].coord);
+  if(d<=0.12){const tIJ=transferMinutes(nodes[j].line,d),tJI=transferMinutes(nodes[i].line,d);adj[i].push({to:j,time:tIJ,dist:0,transfer:true});adj[j].push({to:i,time:tJI,dist:0,transfer:true});}
+ }
+ for(const n of nodes){let p=places.find(q=>q.name===n.name&&geoDist(q.coord,n.coord)<0.15);if(!p){p={name:n.name,coord:n.coord,nodes:[]};places.push(p)}p.nodes.push(n.id)}
+ places.sort((a,b)=>a.name.localeCompare(b.name));from.replaceChildren();to.replaceChildren();
+ for(let i=0;i<places.length;i++)for(const select of [from,to]){let o=document.createElement('option');o.value=i;o.textContent=places[i].name;select.appendChild(o)}
+ from.value='0';to.value=String(Math.min(places.length-1,1));
+}
+rebuildGraph();
+from.value=String(Math.max(0,places.findIndex(x=>x.name==='Rocky Ridge')));
+to.value=String(Math.max(0,places.findIndex(x=>x.name==='YYC')));
+let routeNodes=[];
+function pathfind(){let starts=places[+from.value].nodes,ends=new Set(places[+to.value].nodes),dist=Array(nodes.length).fill(Infinity),prev=Array(nodes.length).fill(null),used=Array(nodes.length).fill(false);for(let s of starts)dist[s]=firstWait(nodes[s].line);for(let step=0;step<nodes.length;step++){let u=-1;for(let i=0;i<nodes.length;i++)if(!used[i]&&(u===-1||dist[i]<dist[u]))u=i;if(u<0||!isFinite(dist[u]))break;if(ends.has(u)){let seq=[u];while(prev[u]){seq.push(prev[u].at);u=prev[u].at}const duration=dist[seq[0]];return {seq:seq.reverse(),duration}}used[u]=true;for(let e of adj[u])if(dist[u]+e.time<dist[e.to]){dist[e.to]=dist[u]+e.time;prev[e.to]={at:u,edge:e}}}return null}
+function safeText(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function journeyParts(seq){
+ const rides=[],transfers=[];let segment=null;
+ for(let i=0;i<seq.length-1;i++){
+  const a=nodes[seq[i]],b=nodes[seq[i+1]],edge=adj[seq[i]].find(x=>x.to===seq[i+1]);
+  if(!edge)continue;
+  if(edge.transfer){if(segment){rides.push(segment);segment=null;}transfers.push({at:a.name,from:a.line,to:b.line});}
+  else{
+   if(!segment||segment.line!==a.line){if(segment)rides.push(segment);segment={line:a.line,from:a.name,to:b.name,fromKm:a.km,toKm:b.km,km:0,min:0,stops:0};}
+   segment.to=b.name;segment.toKm=b.km;segment.km+=edge.dist;segment.min+=edge.time;segment.stops++;
+  }
+ }
+ if(segment)rides.push(segment);
+ return {rides,transfers};
+}
+function routeDirection(leg){const st=lines[leg.line].stations;const destination=leg.toKm>=leg.fromKm?st[st.length-1].name:st[0].name;return 'toward '+destination;}
+function unifiedDirections(seq,options={}){
+ const {rides,transfers}=journeyParts(seq);
+ const walkA=options.walkA,walkB=options.walkB;
+ const railKm=rides.reduce((x,r)=>x+r.km,0);
+ const railMinutes=rides.reduce((x,r)=>x+r.min,0);
+ const railDuration=options.railDuration??(railMinutes+3*transfers.length+firstWait(rides[0]?.line||names[0])+transfers.reduce((a,t)=>a+firstWait(t.to),0));
+ const walkMinutes=(walkA?.min||0)+(walkB?.min||0);
+ const total=railDuration+walkMinutes;
+ const startName=options.startName||rides[0]?.from||'Origin';
+ const endName=options.endName||rides[rides.length-1]?.to||'Destination';
+ const approx=options.approx||false;
+ let timeline=[];
+ if(walkA)timeline.push({type:'walk',name:startName,detail:`Walk ${Math.round(walkA.min)} min (${walkA.km.toFixed(1)} km) to ${rides[0]?.from||'the station'}`,extra:walkA.measured?'Via mapped pedestrian paths':'Approximate walk · street route unavailable'});
+ rides.forEach((leg,index)=>{
+  if(index===0)timeline.push({type:'board',name:leg.from,line:leg.line,detail:`Board ${leg.line} ${routeDirection(leg)}`,extra:`${Math.round(leg.min)} min · ${leg.km.toFixed(1)} km · ${Math.max(0,leg.stops-1)} intermediate stops`});
+  const upcoming=rides[index+1];
+  if(upcoming)timeline.push({type:'transfer',name:leg.to,from:leg.line,to:upcoming.line,detail:`Transfer to ${upcoming.line} ${routeDirection(upcoming)}`,extra:`Allow ~${Math.round(3+firstWait(upcoming.line))} min to transfer and wait · then ride ${Math.round(upcoming.min)} min (${upcoming.km.toFixed(1)} km)`});
+ });
+ const finalStation=rides[rides.length-1]?.to||endName;
+ timeline.push({type:'alight',name:finalStation,detail:walkB?'Exit the station and continue on foot':'Arrive at destination station'});
+ if(walkB)timeline.push({type:'walk',name:endName,detail:`Walk ${Math.round(walkB.min)} min (${walkB.km.toFixed(1)} km) from ${finalStation}`,extra:walkB.measured?'Via mapped pedestrian paths':'Approximate walk · street route unavailable'});
+ const inner=timeline.map((step,i)=>{
+  const next=timeline[i+1];let nodeClass='walk',color='#758d98',attrs='';
+  if(step.type==='board'){nodeClass='rail';color=lines[step.line].color;attrs=`style="--line-color:${color}"`;}
+  if(step.type==='transfer'){nodeClass='dual';color=lines[step.to].color;attrs=`style="--from-color:${lines[step.from].color};--to-color:${lines[step.to].color}"`;}
+  if(step.type==='alight'){nodeClass='rail';color=rides.length?lines[rides[rides.length-1].line].color:'#758d98';attrs=`style="--line-color:${color}"`;}
+  let connectorColor=color;
+  if(step.type==='board')connectorColor=lines[step.line].color;
+  if(step.type==='transfer')connectorColor=lines[step.to].color;
+  const connector=i<timeline.length-1?`<span class="journey-connector ${step.type==='walk'?'walk':''}" style="--segment-color:${connectorColor}"></span>`:'';
+  return `<div class="journey-step"><div class="journey-glyph"><span class="journey-node ${nodeClass}" ${attrs}></span>${connector}</div><div class="journey-copy"><b>${safeText(step.name)}</b><small class="${step.type==='board'||step.type==='transfer'?'line-detail':''}">${safeText(step.detail)}</small>${step.extra?`<small class="time-detail">${safeText(step.extra)}</small>`:''}</div></div>`;
+ }).join('');
+ const transferCount=transfers.length;
+ return `<div class="journey-head"><strong>${Math.round(total)} min${approx?' (approx.)':''}</strong><small>${walkA?'Estimated door-to-door journey':'Estimated station-to-station journey'}</small><div class="journey-meta"><span>${railKm.toFixed(1)} km by metro</span><span>${transferCount} ${transferCount===1?'transfer':'transfers'}</span>${walkA?`<span>${(walkA.km+walkB.km).toFixed(1)} km walking</span>`:''}</div></div><div class="journey-itinerary">${inner}</div><div class="note" style="margin-top:12px">Journey times use the configured line speeds, station dwell times and average waits (half the service headway). Transfers include 3 minutes for walking between platforms.${approx?' At least one walking leg is estimated because pedestrian routing was unavailable.':''}</div>`;
+}
+function solve(){const p=pathfind(),r=document.querySelector('#results');if(!p){r.innerHTML='<p>No track connection found between these stations. Check your interchange alignment.</p>';routeNodes=[];draw();return null;}routeNodes=p.seq;r.innerHTML=unifiedDirections(p.seq,{railDuration:p.duration});draw();return p;}
+document.querySelector('#go').onclick=solve;
+const all=Object.values(lines).flatMap(l=>l.coords);
+let bounds=L.latLngBounds(all.map(c=>[c[1],c[0]]));
+const themeButton=document.getElementById('theme-toggle');
+function setDarkMode(enabled){
+  document.body.classList.toggle('dark',enabled);
+  themeButton.textContent=enabled?'☀ Light mode':'☾ Dark mode';
+  themeButton.setAttribute('aria-pressed',String(enabled));
+  themeButton.setAttribute('aria-label',enabled?'Turn on light mode':'Turn on dark mode');
+  try{localStorage.setItem('crt-dark-mode',enabled?'1':'0')}catch(e){}
+}
+let savedTheme=null;
+try{savedTheme=localStorage.getItem('crt-dark-mode')}catch(e){}
+setDarkMode(savedTheme!=='0');
+themeButton.addEventListener('click',()=>{setDarkMode(!document.body.classList.contains('dark'));draw();});
+const map=L.map('map',{zoomControl:false,preferCanvas:true});
+L.control.zoom({position:'bottomright'}).addTo(map);
+// Esri World Street Map is a public, no-key raster basemap for development use.
+// If tiles cannot be fetched on the user's network, offer a manual alternative.
+const baseProviders = {
+  'Esri Streets': {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', options:{maxZoom:19,attribution:'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors'}},
+  'OSM France HOT': {url:'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', options:{maxZoom:19,attribution:'Data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> (ODbL); Tiles by <a href="https://www.openstreetmap.fr/open-data/">OpenStreetMap France</a> (CC BY-SA), HOT style'}}
+};
+let currentTiles=null, activeProvider='Esri Streets', tileErrors=0, tilesLoaded=0;
+function chooseBasemap(name){
+  activeProvider=name; tileErrors=0;tilesLoaded=0;
+  if(currentTiles) map.removeLayer(currentTiles);
+  const entry=baseProviders[name];
+  currentTiles=L.tileLayer(entry.url,entry.options);
+  currentTiles.on('tileerror',()=>{tileErrors++;if(tileErrors>=4 && !tilesLoaded){document.getElementById('map-alert').style.display='block';}});
+  currentTiles.on('tileload',()=>{tilesLoaded++;document.getElementById('map-alert').style.display='none';});
+  currentTiles.addTo(map);
+}
+chooseBasemap('Esri Streets');
+document.getElementById('basemap-choice').addEventListener('change',e=>chooseBasemap(e.target.value));
+map.fitBounds(bounds.pad(.085));
+let baseLayers=L.layerGroup().addTo(map),stationLayers=L.layerGroup().addTo(map),routeLayers=L.layerGroup().addTo(map);
+let routeFocus=false;
+function draw(){
+ baseLayers.clearLayers();stationLayers.clearLayers();routeLayers.clearLayers();
+ const darkMode=document.body.classList.contains('dark');
+ for(const name of names){let l=lines[name],coords=l.coords.map(p=>[p[1],p[0]]);
+  const hasRoute=routeNodes.length>0;
+  if(!darkMode) L.polyline(coords,{color:'#fff',weight:8,opacity:.96,interactive:false}).addTo(baseLayers);
+  const darkWeight=5.6;
+  const darkOpacity=hasRoute ? .28 : 1;
+  L.polyline(coords,{color:l.color,weight:darkMode?darkWeight:5,opacity:darkMode?darkOpacity:.92,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(baseLayers);
+ }
+ for(const p of places){const bgStationOpacity=(darkMode && routeNodes.length)?0.55:1; let marker=L.circleMarker([p.coord[1],p.coord[0]],{radius:darkMode?3.5:4.5,color:darkMode?'#202428':'#244451',weight:darkMode?1:1.5,fillColor:'#fff',fillOpacity:1,opacity:bgStationOpacity});
+  marker.bindTooltip(safeText(p.name),{direction:'top'});
+  marker.on('click',()=>{if(!window.pickTo){from.value=String(places.indexOf(p));window.pickTo=true}else{to.value=String(places.indexOf(p));window.pickTo=false;solve();}});marker.addTo(stationLayers);
+ }
+ if(routeNodes.length){let points=[];
+  for(let i=0;i<routeNodes.length;i++){const n=nodes[routeNodes[i]];points.push([n.coord[1],n.coord[0]]);
+   L.circleMarker([n.coord[1],n.coord[0]],{radius:i===0||i===routeNodes.length-1?8:5,color:darkMode?'#0b1016':'#162933',weight:2.5,fillColor:lines[n.line].color,fillOpacity:1}).bindTooltip(safeText(n.name)).addTo(routeLayers);
+  }
+  for(let i=0;i<routeNodes.length-1;i++){let a=nodes[routeNodes[i]],b=nodes[routeNodes[i+1]];if(a.line!==b.line)continue;
+   let c=lines[a.line].coords,ia=0,ib=0,da=Infinity,db=Infinity;
+   for(let j=0;j<c.length;j++){let ea=geoDist(a.coord,c[j]),eb=geoDist(b.coord,c[j]);if(ea<da){da=ea;ia=j}if(eb<db){db=eb;ib=j}}
+   let segment=c.slice(Math.min(ia,ib),Math.max(ia,ib)+1).map(v=>[v[1],v[0]]);if(ia>ib)segment.reverse();
+   if(darkMode){
+    // Minimal dark mode: one solid line, just slightly thicker for a selected journey.
+    L.polyline(segment,{color:lines[a.line].color,weight:8.2,opacity:1,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(routeLayers);
+   }else{
+    L.polyline(segment,{color:'#17323d',weight:13,opacity:.8,interactive:false}).addTo(routeLayers);
+    L.polyline(segment,{color:lines[a.line].color,weight:8,opacity:1,interactive:false}).addTo(routeLayers);
+   }
+  }
+  if(routeFocus&&points.length>1){map.fitBounds(L.latLngBounds(points).pad(.35),{maxZoom:13});routeFocus=false;}
+ }
+}
+document.querySelector('#go').addEventListener('click',()=>{routeFocus=true;solve();});
+draw();solve();
+const panel=document.getElementById('journey-panel');const toggle=document.getElementById('toggle-panel');
+function setPanel(open){panel.classList.toggle('is-closed',!open);toggle.classList.toggle('is-open',open);toggle.textContent=open?'✕':'☰  Directions';toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close directions panel':'Open directions panel');setTimeout(()=>map.invalidateSize(),240)}
+toggle.addEventListener('click',()=>setPanel(panel.classList.contains('is-closed')));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.classList.contains('is-closed'))setPanel(false)});
+// Keep the map fully sized after its fixed-position container is displayed.
+requestAnimationFrame(()=>map.invalidateSize());
+
+// Address-to-address mode: KML rail network + live public geocoding and pedestrian routing.
+let searchCenter=[-114.07,51.045], searchRadius=85;
+let pedestrianLayers=L.layerGroup().addTo(map);
+const setMode=(mode)=>{
+ document.getElementById('address-ui').hidden=mode!=='address';
+ document.getElementById('station-ui').hidden=mode!=='station';
+ document.getElementById('address-tab').classList.toggle('active',mode==='address');
+ document.getElementById('station-tab').classList.toggle('active',mode==='station');
+ if(mode==='station'){pedestrianLayers.clearLayers();document.getElementById('address-status').textContent='Select two stations.';}
+};
+document.getElementById('address-tab').onclick=()=>setMode('address');
+document.getElementById('station-tab').onclick=()=>setMode('station');
+setMode('address');
+const statusEl=document.getElementById('address-status');
+const signalStatus=(v)=>{statusEl.textContent=v};
+const fetchJson=async(url)=>{const r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)throw Error('Service returned '+r.status);return r.json()};
+const chosenAddress={"address-from":null,"address-to":null};
+// Locate places around whichever transit network is currently active.
+// Bounding the provider query avoids worldwide search results crowding out local matches.
+function networkSearchUrl(query){
+ const lon=searchCenter[0], lat=searchCenter[1];
+ const radius=Math.max(20,searchRadius);
+ const deltaLat=radius/111.32;
+ const deltaLon=radius/(111.32*Math.max(.15,Math.cos(lat*Math.PI/180)));
+ const bbox=[
+  Math.max(-180,lon-deltaLon),Math.max(-90,lat-deltaLat),
+  Math.min(180,lon+deltaLon),Math.min(90,lat+deltaLat)
+ ].map(x=>x.toFixed(5)).join(',');
+ return 'https://photon.komoot.io/api/?q='+encodeURIComponent(query)+
+  '&limit=40&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lon)+
+  '&bbox='+encodeURIComponent(bbox);
+}
+function nearbyFeatures(features){
+ return (features||[]).filter(f=>f.geometry&&
+  geoDist(f.geometry.coordinates,searchCenter)<=searchRadius);
+}
+
+async function geocodeAddress(q,fieldId){
+ const saved=chosenAddress[fieldId];
+ if(saved && saved.text===q)return {coord:saved.coord,name:saved.name};
+ const query=q;
+ const url=networkSearchUrl(query);
+ const data=await fetchJson(url);
+ const opts=nearbyFeatures(data.features);
+ if(!opts.length)throw Error('Could not find that location near the imported network. Try a full address or place name.');
+ const best=opts[0];return {coord:best.geometry.coordinates,name:[best.properties.name,best.properties.housenumber,best.properties.street,best.properties.city].filter(Boolean).join(' · ')};
+}
+function nearestStationCandidates(coord,num=5){return places.map((p,i)=>({i,km:geoDist(coord,p.coord)})).sort((a,b)=>a.km-b.km).slice(0,num)}
+// Public walking profile. Returns sidewalk/footway geometry when the endpoint is accessible.
+async function sidewalkPath(a,b){
+ const query={locations:[{lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]}],costing:'pedestrian',directions_options:{units:'kilometers'}};
+ try{
+  const response=await fetchJson('https://valhalla1.openstreetmap.de/route?json='+encodeURIComponent(JSON.stringify(query)));
+  const leg=response.trip.legs[0],summary=response.trip.summary;
+  if(!leg||!summary)throw Error('Incomplete routing result');
+  // Valhalla returns an encoded polyline6 rather than raw geographic coordinates.
+  const shape=decodePolyline6(leg.shape);
+  return {km:summary.length,min:summary.time/60,shape,measured:true};
+ }catch(e){return {km:geoDist(a,b)*1.35,min:geoDist(a,b)*1.35/4.8*60,shape:[[a[1],a[0]],[b[1],b[0]]],measured:false};}
+}
+function decodePolyline6(str){let index=0,lat=0,lon=0,result=[];while(index<str.length){for(const kind of [0,1]){let shift=0,r=0,b;do{b=str.charCodeAt(index++)-63;r|=(b&31)<<shift;shift+=5}while(b>=32&&index<=str.length);let d=r&1?~(r>>1):(r>>1);if(kind===0)lat+=d;else lon+=d}result.push([lat/1e6,lon/1e6]);}return result;}
+let addressBusy=false;
+async function planAddresses(){
+ if(addressBusy)return;
+ const startQuery=document.getElementById('address-from').value.trim(),endQuery=document.getElementById('address-to').value.trim();
+ if(!startQuery||!endQuery){signalStatus('Enter both a starting address and destination.');return}
+ addressBusy=true;const btn=document.getElementById('address-go');btn.disabled=true;btn.textContent='Finding route…';pedestrianLayers.clearLayers();
+ try{
+  signalStatus('Finding addresses near your network…');
+  const origin=await geocodeAddress(startQuery,'address-from'),destination=await geocodeAddress(endQuery,'address-to');
+  signalStatus('Finding suitable stations…');
+  const originalFrom=from.value,originalTo=to.value;
+  const aCandidates=nearestStationCandidates(origin.coord,5),bCandidates=nearestStationCandidates(destination.coord,5);
+  let best=null;
+  for(const a of aCandidates)for(const b of bCandidates){
+   from.value=String(a.i);to.value=String(b.i);const rail=pathfind();if(!rail)continue;
+   const walkGuess=(a.km+b.km)*1.35/4.8*60;
+   const total=rail.duration+walkGuess;
+   if(!best||total<best.score)best={a,b,rail,score:total};
+  }
+  from.value=originalFrom;to.value=originalTo;
+  if(!best)throw Error('No connected transit route was found between nearby stations.');
+  signalStatus('Calculating pedestrian routes on local streets and sidewalks…');
+  const [walkA,walkB]=await Promise.all([sidewalkPath(origin.coord,places[best.a.i].coord),sidewalkPath(places[best.b.i].coord,destination.coord)]);
+  from.value=String(best.a.i);to.value=String(best.b.i);routeFocus=true;solve();
+  const result=document.querySelector('#results');
+  const approximate=!walkA.measured||!walkB.measured;
+  result.innerHTML=unifiedDirections(best.rail.seq,{railDuration:best.rail.duration,walkA,walkB,startName:startQuery,endName:endQuery,approx:approximate});
+  const legs=[{w:walkA,start:origin.coord,end:places[best.a.i].coord},{w:walkB,start:places[best.b.i].coord,end:destination.coord}];
+  for(const x of legs){L.polyline(x.w.shape,{color:x.w.measured?'#6BB1E7':'#F0B15A',weight:4,opacity:.95,dashArray:'5 7',interactive:false}).addTo(pedestrianLayers)}
+  L.circleMarker([origin.coord[1],origin.coord[0]],{radius:7,color:'#fff',weight:2,fillColor:'#2778D9',fillOpacity:1}).bindPopup('Start: '+safeText(origin.name)).addTo(pedestrianLayers);
+  L.circleMarker([destination.coord[1],destination.coord[0]],{radius:7,color:'#fff',weight:2,fillColor:'#2778D9',fillOpacity:1}).bindPopup('Destination: '+safeText(destination.name)).addTo(pedestrianLayers);
+  const extent=L.latLngBounds([[origin.coord[1],origin.coord[0]],[destination.coord[1],destination.coord[0]],...[...walkA.shape,...walkB.shape]]);
+  map.fitBounds(extent.pad(.16),{maxZoom:13});
+  signalStatus(approximate?'Route found. Orange dashed walking legs are approximate; blue dashed legs follow mapped paths.':'Route found. Blue dashed walking legs follow mapped pedestrian paths.');
+ }catch(e){signalStatus('Address planning unavailable: '+e.message+' This requires online geocoding; you can still plan station-to-station trips.');}
+ finally{addressBusy=false;btn.disabled=false;btn.textContent='Find door-to-door route →';}
+}
+
+// Address and landmark suggestions follow the geographic bounds of the imported network.
+const addressFields=['address-from','address-to'];
+const suggestionTimers={},suggestionRequests={};
+function closeSuggestions(id){const menu=document.getElementById(id==='address-from'?'suggest-from':'suggest-to');menu.hidden=true;menu.innerHTML='';document.getElementById(id).setAttribute('aria-expanded','false')}
+function labelFeature(f){const p=f.properties||{};const name=[p.name,p.housenumber,p.street].filter(Boolean).join(' ');return {name:name||p.street||'Unnamed place',sub:[p.city||p.county,p.state].filter(Boolean).join(', '),coord:f.geometry.coordinates}}
+function acceptSuggestion(id,item){const field=document.getElementById(id);const label=[item.name,item.sub].filter(Boolean).join(', ');field.value=label;chosenAddress[id]={text:label,name:label,coord:item.coord};closeSuggestions(id);field.focus()}
+async function updateSuggestions(id){
+ const field=document.getElementById(id),query=field.value.trim(),menu=document.getElementById(id==='address-from'?'suggest-from':'suggest-to');
+ if(query.length<3){closeSuggestions(id);return}
+ const request=(suggestionRequests[id]||0)+1;suggestionRequests[id]=request;
+ menu.hidden=false;field.setAttribute('aria-expanded','true');menu.innerHTML='<div class="lookup-note">Searching places near this network…</div>';
+ try{
+  const q=query;
+  const url=networkSearchUrl(q);
+  const result=await fetchJson(url);
+  if(request!==suggestionRequests[id]||document.activeElement!==field)return;
+  const items=nearbyFeatures(result.features).map(labelFeature).slice(0,6);
+  menu.innerHTML='';
+  if(!items.length){menu.innerHTML='<div class="lookup-note">No matching places near this network. Try a more complete address.</div>';return}
+  items.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='address-suggestion';b.setAttribute('role','option');const strong=document.createElement('strong');strong.textContent=item.name;const small=document.createElement('small');small.textContent=item.sub||'Place';b.append(strong,small);b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>acceptSuggestion(id,item));menu.appendChild(b)});
+ }catch(e){if(request===suggestionRequests[id])menu.innerHTML='<div class="lookup-note">Suggestions unavailable; you can still enter an address manually.</div>'}
+}
+for(const id of addressFields){const field=document.getElementById(id);
+ field.addEventListener('input',()=>{chosenAddress[id]=null;suggestionRequests[id]=(suggestionRequests[id]||0)+1;clearTimeout(suggestionTimers[id]);suggestionTimers[id]=setTimeout(()=>updateSuggestions(id),350)});
+ field.addEventListener('focus',()=>{if(field.value.trim().length>=3&&!chosenAddress[id]){clearTimeout(suggestionTimers[id]);suggestionTimers[id]=setTimeout(()=>updateSuggestions(id),200)}});
+ field.addEventListener('keydown',e=>{const menu=document.getElementById(id==='address-from'?'suggest-from':'suggest-to');const buttons=Array.from(menu.querySelectorAll('.address-suggestion'));
+  if(e.key==='Escape'){closeSuggestions(id);return}
+  if((e.key==='ArrowDown'||e.key==='ArrowUp')&&buttons.length){e.preventDefault();const active=buttons.findIndex(x=>x.classList.contains('selected'));const next=e.key==='ArrowDown'?(active+1)%buttons.length:(active<=0?buttons.length-1:active-1);buttons.forEach((b,i)=>b.classList.toggle('selected',i===next));return}
+  if(e.key==='Enter'&&!menu.hidden&&buttons.length){e.preventDefault();const b=buttons.find(x=>x.classList.contains('selected'))||buttons[0];b.click()}
+ });
+ field.addEventListener('blur',()=>setTimeout(()=>closeSuggestions(id),180));
+}
+document.getElementById('swap-addresses').addEventListener('click',()=>{
+ const a=document.getElementById('address-from'),b=document.getElementById('address-to');
+ [a.value,b.value]=[b.value,a.value];
+ [chosenAddress['address-from'],chosenAddress['address-to']]=[chosenAddress['address-to'],chosenAddress['address-from']];
+ for(const id of addressFields){clearTimeout(suggestionTimers[id]);suggestionRequests[id]=(suggestionRequests[id]||0)+1;closeSuggestions(id)}
+});
+
+document.getElementById('address-go').addEventListener('click',planAddresses);
+for(const id of ['address-from','address-to'])document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')planAddresses()});
+
+// MetroDreamin-compatible KML importer. Runs locally; imported files are not uploaded.
+function kmlCoords(text){return (text||'').trim().split(/\s+/).map(v=>v.split(',').map(Number)).filter(c=>c.length>=2&&Number.isFinite(c[0])&&Number.isFinite(c[1])&&Math.abs(c[0])<=180&&Math.abs(c[1])<=90).map(c=>c.slice(0,2));}
+function kmlChildren(root,tag){return Array.from(root.children).filter(el=>el.localName===tag)}
+function kmlChild(root,tag){return kmlChildren(root,tag)[0]||null}
+function kmlValue(root,tag){return kmlChild(root,tag)?.textContent?.trim()||''}
+function kmOnPath(p,coords){
+ let best=Infinity,along=0,cumulative=0;
+ for(let i=1;i<coords.length;i++){
+  const a=coords[i-1],b=coords[i],lat=(a[1]+b[1])*Math.PI/360,cos=Math.cos(lat),dx=(b[0]-a[0])*cos,dy=b[1]-a[1];
+  const t=Math.max(0,Math.min(1,((p[0]-a[0])*cos*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy||1)));
+  const projection=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],distance=geoDist(p,projection);
+  if(distance<best){best=distance;along=cumulative+geoDist(a,b)*t}
+  cumulative+=geoDist(a,b)
+ }
+ return {km:along,error:best};
+}
+function parseTransitKml(source){
+ const xml=new DOMParser().parseFromString(source,'application/xml');
+ if(xml.querySelector('parsererror'))throw Error('Invalid KML/XML file');
+ const placemarks=Array.from(xml.getElementsByTagNameNS('*','Placemark'));
+ const extracted={},markers=[],palette=['#dc4554','#42bddd','#e5be4d','#298b69','#9762b7','#e88745','#d6a01f','#e36dac','#4c8fdb'];
+ const groupName=(placemark)=>{let parent=placemark.parentElement;while(parent){if(parent.localName==='Folder'){const n=kmlValue(parent,'name');if(n&&n!=='Lines'&&n!=='Stations')return n}parent=parent.parentElement}return ''};
+ for(const pm of placemarks){
+  const name=kmlValue(pm,'name')||'Unnamed';
+  const lineTags=pm.getElementsByTagNameNS('*','LineString');
+  if(lineTags.length){
+   const coords=Array.from(lineTags).flatMap(ls=>kmlCoords(ls.getElementsByTagNameNS('*','coordinates')[0]?.textContent));
+   if(coords.length<2)continue;
+   const style=pm.getElementsByTagNameNS('*','LineStyle')[0];let color=style?.getElementsByTagNameNS('*','color')[0]?.textContent?.trim();
+   if(color&&/^[0-9a-f]{8}$/i.test(color))color='#'+color.slice(6,8)+color.slice(4,6)+color.slice(2,4);else color=palette[Object.keys(extracted).length%palette.length];
+   const key=extracted[name]?`${name} ${Object.keys(extracted).length+1}`:name;
+   extracted[key]={coords,stations:[],color};
+  }
+  const pt=pm.getElementsByTagNameNS('*','Point')[0];
+  if(pt){const coord=kmlCoords(pt.getElementsByTagNameNS('*','coordinates')[0]?.textContent)[0];if(coord)markers.push({name,coord,group:groupName(pm)});}
+ }
+ const lineNames=Object.keys(extracted);
+ if(!lineNames.length)throw Error('No LineString tracks found. Export the KML with line geometry included.');
+ for(const marker of markers){
+  let candidates=marker.group&&extracted[marker.group]?[marker.group]:lineNames;
+  let choice=null;
+  for(const name of candidates){const pos=kmOnPath(marker.coord,extracted[name].coords);if(!choice||pos.error<choice.error)choice={name,...pos}}
+  if(choice&&choice.error<.18)extracted[choice.name].stations.push({name:marker.name,coord:marker.coord,km:choice.km});
+ }
+ for(const name of lineNames){
+  const line=extracted[name];line.stations.sort((a,b)=>a.km-b.km);
+  if(!line.stations.length)delete extracted[name];
+ }
+ if(!Object.keys(extracted).length)throw Error('No stations matched the tracks. This importer requires Point stations near LineString routes.');
+ return extracted;
+}
+let importedName='Calgary Rapid Transit';
+function activateNetwork(newLines,name){
+ lines=newLines;resetServiceSettings();rebuildGraph();renderServiceSettings();routeNodes=[];window.pickTo=false;
+ pedestrianLayers.clearLayers();baseLayers.clearLayers();stationLayers.clearLayers();routeLayers.clearLayers();
+ for(const id of addressFields){chosenAddress[id]=null;document.getElementById(id).value='';closeSuggestions(id);suggestionRequests[id]=(suggestionRequests[id]||0)+1}
+ const cs=Object.values(lines).flatMap(l=>l.coords);
+ bounds=L.latLngBounds(cs.map(c=>[c[1],c[0]]));
+ const center=bounds.getCenter();searchCenter=[center.lng,center.lat];
+ const endpoints=[bounds.getSouthWest(),bounds.getNorthEast()];
+ searchRadius=Math.max(25,Math.min(180,geoDist([endpoints[0].lng,endpoints[0].lat],[endpoints[1].lng,endpoints[1].lat])*1.0));
+ importedName=name;
+ 
+ document.querySelector('.maphead').firstChild.textContent=name+' Map ';
+ document.getElementById('results').innerHTML='<div class="empty">Choose two stations or search two addresses to plan a journey.</div>';
+ signalStatus('Search for addresses and places near the imported network.');
+ document.getElementById('import-status').textContent=`${names.length} lines · ${nodes.length} station stops · ${places.length} named stations`;
+ draw();map.invalidateSize();map.fitBounds(bounds.pad(.1),{maxZoom:12});
+}
+document.getElementById('kml-upload').addEventListener('change',async e=>{
+ const file=e.target.files[0];if(!file)return;
+ const status=document.getElementById('import-status');status.textContent='Reading '+file.name+'…';
+ try{
+  if(file.size>15*1024*1024)throw Error('File exceeds 15 MB.');
+  const content=await file.text();const network=parseTransitKml(content);
+  const title=file.name.replace(/_\d{8,}.*$/,'').replace(/\.kml$/i,'').replaceAll('_',' ').trim()||'Imported Transit';
+  activateNetwork(network,title);
+ }catch(err){status.textContent='Import failed: '+err.message}
+ e.target.value='';
+});
+
+
+// Private, opt-in service editor. No inferred modes from line names or files.
+const serviceModal=document.getElementById('service-modal');
+const serviceList=document.getElementById('service-list');
+function renderServiceSettings(){
+ if(!serviceList)return;
+ serviceList.replaceChildren();
+ document.getElementById('service-count').textContent=`${Object.keys(lines).length} lines · defaults to Metro`;
+ for(const line of Object.keys(lines)){
+  const config=serviceOf(line),row=document.createElement('section');row.className='service-item';
+  const head=document.createElement('div');head.className='service-item-head';
+  const dot=document.createElement('span');dot.className='service-dot';dot.style.background=lines[line].color;
+  const nm=document.createElement('span');nm.className='service-item-name';nm.textContent=line;
+  head.append(dot,nm);row.append(head);
+  const grid=document.createElement('div');grid.className='service-grid';
+  const mkField=(caption,el)=>{const label=document.createElement('label');label.textContent=caption;label.append(el);grid.append(label);return el};
+  const mode=document.createElement('select');mode.setAttribute('aria-label',`${line} mode`);
+  for(const name of Object.keys(SERVICE_PRESETS)){const op=document.createElement('option');op.value=name;op.textContent=name;mode.append(op)}
+  mode.value=config.mode;
+  const inputs={};
+  for(const [key,caption,unit,min,max] of [['speed','Average speed (km/h)','km/h',5,350],['frequency','Frequency (min)','min',1,120],['dwell','Station dwell (sec)','sec',0,240]]){
+   const inp=document.createElement('input');inp.type='number';inp.min=min;inp.max=max;inp.step=key==='dwell'?5:1;inp.value=config[key];inp.setAttribute('aria-label',`${line} ${caption}`);inputs[key]=inp;mkField(caption,inp);
+   inp.addEventListener('change',()=>{const value=Number(inp.value);if(!Number.isFinite(value))return;config[key]=Math.max(min,Math.min(max,value));inp.value=config[key];config.mode='Custom';mode.value='Custom';updateServiceRouting()});
+  }
+  // Mode first, then speed/frequency/dwell.
+  const modeWrap=document.createElement('label');modeWrap.textContent='Service mode';modeWrap.append(mode);grid.prepend(modeWrap);
+  mode.addEventListener('change',()=>{const value=mode.value;Object.assign(config,{mode:value,...SERVICE_PRESETS[value]});for(const key of Object.keys(inputs))inputs[key].value=config[key];updateServiceRouting()});
+  row.append(grid);serviceList.append(row);
+ }
+}
+function updateServiceRouting(){
+ rebuildGraph();routeNodes=[];pedestrianLayers.clearLayers();
+ document.getElementById('results').innerHTML='<div class="empty">Service assumptions updated. Search again to recalculate your journey.</div>';
+ draw();
+}
+function openServiceSettings(){renderServiceSettings();serviceModal.hidden=false;document.getElementById('service-close').focus()}
+function closeServiceSettings(){serviceModal.hidden=true;document.getElementById('operations-settings').focus()}
+document.getElementById('operations-settings').addEventListener('click',openServiceSettings);
+document.getElementById('service-close').addEventListener('click',closeServiceSettings);
+document.getElementById('service-done').addEventListener('click',closeServiceSettings);
+serviceModal.addEventListener('click',e=>{if(e.target===serviceModal)closeServiceSettings()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!serviceModal.hidden){e.stopPropagation();closeServiceSettings()}});
+document.getElementById('service-reset').addEventListener('click',()=>{resetServiceSettings();updateServiceRouting();renderServiceSettings()});
+</script></body></html>

@@ -1,0 +1,41 @@
+name: Windows installer
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run dist
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - run: npm run test:packaged
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          $assets = Get-ChildItem -LiteralPath dist -File | Where-Object { $_.Extension -in '.exe', '.blockmap' }
+          if (-not ($assets | Where-Object Extension -eq '.exe')) { throw 'Installer not found' }
+          $lines = $assets | Sort-Object Name | ForEach-Object { "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" }
+          $lines | Set-Content -LiteralPath dist/SHA256SUMS.txt -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KML-Transit-Journey-Windows-x64
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/SHA256SUMS.txt
