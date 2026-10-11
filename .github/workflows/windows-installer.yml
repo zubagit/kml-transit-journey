@@ -11,13 +11,15 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: '24'
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Check downloaded Electron runtime
+        run: node -e "const fs=require('fs'),cp=require('child_process'),p=require('electron');console.log('Electron path:',p,'bytes:',fs.statSync(p).size);const r=cp.spawnSync(p,['--version'],{encoding:'utf8',timeout:15000});console.log('Exit:',r.status,'stdout:',r.stdout,'stderr:',r.stderr,'error:',r.error?.message)"
       - run: npm test
         env:
           DEBUG: 'pw:browser'
@@ -34,7 +36,7 @@ jobs:
           if (-not ($assets | Where-Object Extension -eq '.exe')) { throw 'Installer not found' }
           $lines = $assets | Sort-Object Name | ForEach-Object { "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" }
           $lines | Set-Content -LiteralPath dist/SHA256SUMS.txt -Encoding utf8
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: KML-Transit-Journey-Windows-x64
           if-no-files-found: error
