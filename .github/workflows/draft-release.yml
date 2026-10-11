@@ -24,6 +24,8 @@ jobs:
         run: node -e "if(require('./package.json').version !== '1.0.0') process.exit(1)"
       - run: npm ci
       - run: npm run check
+      - name: Check downloaded Electron runtime
+        run: node -e "const fs=require('fs'),cp=require('child_process'),p=require('electron');console.log('Electron path:',p,'bytes:',fs.statSync(p).size);const r=cp.spawnSync(p,['--version'],{encoding:'utf8',timeout:15000});console.log('Exit:',r.status,'stdout:',r.stdout,'stderr:',r.stderr,'error:',r.error?.message)"
       - run: npm test
         env:
           DEBUG: 'pw:browser'
