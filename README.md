@@ -6,7 +6,9 @@ This is a planning and simulation tool. It does not provide real transit schedul
 
 ## Download and install
 
-Open the repository's **Releases** page with release-management access to find the draft v1.0.0 release. Download `KML-Transit-Journey-1.0.0-Windows-x64-Setup.exe`, run the installer and choose an installation folder. Uninstall through Windows Settings → Apps. Public distribution is pending owner approval.
+[**Download the Windows installer**](https://github.com/zubagit/kml-transit-journey/releases/download/v1.0.0/KML-Transit-Journey-1.0.0-Windows-x64-Setup.exe) · [Release notes and all downloads](https://github.com/zubagit/kml-transit-journey/releases/tag/v1.0.0)
+
+Download `KML-Transit-Journey-1.0.0-Windows-x64-Setup.exe`, run the installer and choose an installation folder. Uninstall through Windows Settings → Apps. The repository and v1.0.0 release are public; no GitHub account is required to download the installer.
 
 The installer targets 64-bit Windows 10/11. ARM64 and 32-bit packages are not supplied. The initial installer is unsigned and may trigger an unknown-publisher warning. Verify the download against the release's `SHA256SUMS.txt`; obtain it only from this project's release page. There is no automatic updater.
 
@@ -67,4 +69,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Include reproduction steps and a small n
 
 ## License
 
-MIT is the proposed license for project code; it is prepared in [LICENSE](LICENSE) for owner review before public publication. See [license choice guidance](docs/LICENSE_CHOICE.md). Third-party libraries, maps, and datasets retain their own licenses and terms; the project license does not grant rights to external maps or imported KML. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Project code is licensed under [MIT](LICENSE). See [license choice guidance](docs/LICENSE_CHOICE.md) for the rationale. Third-party libraries, maps, and datasets retain their own licenses and terms; the project license does not grant rights to external maps or imported KML. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

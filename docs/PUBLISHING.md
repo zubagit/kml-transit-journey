@@ -1,6 +1,6 @@
 # Publishing with minimal manual work
 
-The owner chose **private** visibility. Repository: https://github.com/zubagit/kml-transit-journey . v1.0.0 is prepared as a draft release. Do not make the repository public or publish the draft without the owner's later explicit approval.
+The owner approved public publication on October 11, 2026. Repository: https://github.com/zubagit/kml-transit-journey . Release: https://github.com/zubagit/kml-transit-journey/releases/tag/v1.0.0 . The initial private draft was published with its verified installer and assets.
 
 The local project folder uses branch `main` and the repository remote above. GitHub sign-in was verified as `zubagit`; commits use the account's GitHub noreply address. The source ZIP contains project files, including workflows and lockfile, but excludes local Git metadata, dependency downloads and build output. The installer and related downloadable assets belong in Releases, rather than in Git history.
 

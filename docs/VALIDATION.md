@@ -32,7 +32,7 @@ Prepared on October 11, 2026 from `KML_Transit_Journey_Windows_App_Starter.zip` 
 
 The installer is unsigned. Signing certificates and automatic updating are not configured. A default Electron application icon is used.
 
-The release tag also includes documentation and draft-workflow updates made after the successful Windows run. Application code, package/lockfile and build configuration are unchanged from the tested build-source commit. The initial release remains a private draft, as requested by the owner.
+The release tag also includes documentation and draft-workflow updates made after the successful Windows run. Application code, package/lockfile and build configuration are unchanged from the tested build-source commit. The owner subsequently approved public publication; repository and release are public. Documentation in the tagged source reflects the preparation stage; the current README and published release notes provide public download links.
 
 ## Dependency audit
 
