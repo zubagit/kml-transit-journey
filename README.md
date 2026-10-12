@@ -2,6 +2,8 @@
 
 A desktop journey planner for custom and fictional transit networks. Import KML tracks and stations, explore your network on a map, and compare journeys using configurable service assumptions.
 
+Originally created for transit networks designed in [MetroDreamin’](https://metrodreamin.com/). For exporting MetroDreamin’ maps to KML, see [MetroDreamin’ to KML by Ascor8522](https://github.com/Ascor8522/MetroDreamin-to-KML).
+
 This is a planning and simulation tool. It does not provide real transit schedules, live arrivals, fares, accessibility guarantees, or safety guidance.
 
 ## Download and install
