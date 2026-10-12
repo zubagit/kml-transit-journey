@@ -6,7 +6,7 @@ This is a planning and simulation tool. It does not provide real transit schedul
 
 ## Download and install
 
-This repository is **private**, at the owner's request. Open the repository's **Releases** page with release-management access to find the draft v1.0.0 release. Download `KML-Transit-Journey-1.0.0-Windows-x64-Setup.exe`, run the installer and choose an installation folder. Uninstall through Windows Settings → Apps. Public distribution is pending owner approval.
+Open the repository's **Releases** page with release-management access to find the draft v1.0.0 release. Download `KML-Transit-Journey-1.0.0-Windows-x64-Setup.exe`, run the installer and choose an installation folder. Uninstall through Windows Settings → Apps. Public distribution is pending owner approval.
 
 The installer targets 64-bit Windows 10/11. ARM64 and 32-bit packages are not supplied. The initial installer is unsigned and may trigger an unknown-publisher warning. Verify the download against the release's `SHA256SUMS.txt`; obtain it only from this project's release page. There is no automatic updater.
 
